@@ -3,7 +3,7 @@
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
 {
 	int ActionCode;//0 для движения 1 для поворота
-	int ActionRate;// принимает значения от 0 до 10
+	int ActionRate;// принимает значения от 0 до GetMaxMove() и GetMaxAngle()
 };
 struct Coord//структура координат
 {
@@ -99,14 +99,14 @@ private:
 	}
 
 public:
-Fighter(Coord a)//объект инициализируется одним аргументом класса Arena
+Fighter()
 	{
 	PreviousAct=0;
 	Act.ActionCode=0;
 	Act.ActionRate=0;
-	MyCoord.X=a.X;
-	MyCoord.Y=a.Y;
-	MyCoord.Angle=a.Angle;
+	MyCoord.X=0;
+	MyCoord.Y=0;
+	MyCoord.Angle=0;
 	}
 Coord GetCoord()
 	{
@@ -114,9 +114,7 @@ Coord GetCoord()
 	}
 void SetCoord(Coord a)
 {
-	MyCoord.X=a.X;
-	MyCoord.Y=a.Y;
-	MyCoord.Angle=a.Angle;
+	MyCoord=a;
 }
 Action GetAction(Arena a,Fighter enemy)
 {
