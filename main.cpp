@@ -12,7 +12,7 @@ int count = 0;
 const int Multiplier=4;
 const int WindowSizeX=700;
 const int WindowSizeY=500;
-const int ActionInterval = 50; //интервал опроса бойцов
+const int ActionInterval = 20; //интервал опроса бойцов
 const int border = 28;
 
 struct triangle
@@ -25,7 +25,7 @@ struct triangle
     int y3;
 };
 
-static Arena ar((WindowSizeX-border*2)*Multiplier,(WindowSizeY-border*2)*Multiplier,30,30);
+static Arena ar((WindowSizeX-border*2)*Multiplier,(WindowSizeY-border*2)*Multiplier,5,15);
 
 class MyTimer : public QObject {
 protected:
