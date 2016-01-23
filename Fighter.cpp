@@ -9,8 +9,9 @@ struct Coord//структура координат
 {
 	int X;
 	int Y;
+	int Angle;
 };
-Coord operator-(Coord a,Coord b)//сделал себе перегрузку для удовства
+Coord operator-(Coord a,Coord b)//сделал себе перегрузку для удобства
 {
 	Coord c;
 	c.X=a.X-b.X;
@@ -25,7 +26,7 @@ float operator*(Coord a,Coord b)
 }
 float abs(Coord a)
 {
-	return(std::sqrt(std::pow(a.X,2)+std::pow(a.Y,2)));
+	return((float)(std::sqrt(std::pow(a.X,2)+std::pow(a.Y,2))));
 }
 class Arena //мое представление класса Arena, чтоб проверить синтаксис
 {
@@ -39,19 +40,12 @@ public:
 	{return(0);}
 	int GetArenaSizeY()
 	{return(0);}
-	int GetCoordX()
-	{return(0);}
-	int GetCoordY()
-	{return(0);}
-	int GetAngle()
-	{return(0);}
 };
 class Fighter
 {
 private:
 	Action Act;
 	Coord MyCoord;
-	int Angle;
 	int PreviousAct; //будем знать что делали раньше
 	int AngleToWall(Arena a)//возвращает угол убегания от ближайшей стены
 	{
@@ -105,35 +99,31 @@ private:
 	}
 
 public:
-Fighter(Arena a)//объект инициализируется одним аргументом класса Arena
+Fighter(Coord a)//объект инициализируется одним аргументом класса Arena
 	{
 	PreviousAct=0;
 	Act.ActionCode=0;
 	Act.ActionRate=0;
-	MyCoord.X=a.GetCoordX();
-	MyCoord.Y=a.GetCoordY();
-	Angle=a.GetAngle();
+	MyCoord.X=a.X;
+	MyCoord.Y=a.Y;
+	MyCoord.Angle=a.Angle;
 	}
 Coord GetCoord()
 	{
 	return(MyCoord);
 	}
-void SetCoord(Arena a)
+void SetCoord(Coord a)
 {
-	MyCoord.X=a.GetCoordX();
-	MyCoord.Y=a.GetCoordY();
+	MyCoord.X=a.X;
+	MyCoord.Y=a.Y;
+	MyCoord.Angle=a.Angle;
 }
 Action GetAction(Arena a,Fighter enemy)
 {
-	MyCoord.X=a.GetCoordX();//перед расчетом действий обновляем свое состояние из арены
-	MyCoord.Y=a.GetCoordY();//узкое место. данные о враге буду получать те, которые записаны
-	Angle=a.GetAngle();		/*в нем, а не корректные из менеджера добавил метод SetCoord(Arena a)
-	 вызываешь его у противника для актуализации данных о его положении,
-	  перед выполнением метода GetAction() у бойца, которого обсчитываешь*/
 	if(PreviousAct==0)
 	{
 		int DeltaAngle=0;
-		DeltaAngle=DesiredAngle(a,enemy)-Angle;
+		DeltaAngle=DesiredAngle(a,enemy)-MyCoord.Angle;
 		if(DeltaAngle<-180)
 		{DeltaAngle+=360;}
 		if(DeltaAngle>180)
