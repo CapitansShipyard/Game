@@ -25,18 +25,18 @@ int Fighter::AngleToWall(Arena a)//возвращает угол убегани�
     int walls[4][2];
     int temp[2];
 
-    walls[0][0]=MyCoord.Y; walls[0][1]=180;
-    walls[1][0]=a.GetArenaSizeX()-MyCoord.X; walls[1][1]=270;
-    walls[2][0]=a.GetArenaSizeY()-MyCoord.Y; walls[2][1]=0;
-    walls[3][0]=MyCoord.X; walls[3][0]=90;
-    for(int n=3;n>1;n--)//сортируем расстояния до стен
+    walls[0][0]=MyCoord.Y; walls[0][1]=270;
+    walls[1][0]=a.GetArenaSizeX()-MyCoord.X; walls[1][1]=180;
+    walls[2][0]=a.GetArenaSizeY()-MyCoord.Y; walls[2][1]=90;
+    walls[3][0]=MyCoord.X; walls[3][1]=0;
+    for(int n=3;n>0;n--)//сортируем расстояния до стен
     {
         for(int i=0;i<n;i++)
         {
             if(walls[i][0]>walls[i+1][0])
             {
                 temp[0]=walls[i+1][0]; temp[1]=walls[i+1][1];
-                walls[i+1][0]=walls[1][0]; walls[i+1][1]=walls[i][1];
+                walls[i+1][0]=walls[i][0]; walls[i+1][1]=walls[i][1];
                 walls[i][0]=temp[0]; walls[i][1]=temp[1];
             }
         }
@@ -48,7 +48,7 @@ int Fighter::AngleToEnemy(Fighter enemy)//возвращает угол убег
 {
     Coord vector=enemy.GetCoord()-MyCoord;
     Coord Yvector;
-    Yvector.X=0; Yvector.Y=-1;
+    Yvector.X=1; Yvector.Y=0;
     float cosA=vector*Yvector/abs(vector)*abs(Yvector);
     int Angle=(int)(std::acos(cosA)*180.0/3.1415);
     Angle+=180;
