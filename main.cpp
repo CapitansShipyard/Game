@@ -148,8 +148,9 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,WindowSizeX,WindowSizeY));
+    QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,WindowSizeX,WindowSizeY));   
     QGraphicsView view(scene);
+    view.setWindowTitle("Battle manager");
 
     QGraphicsRectItem* pRectItem = new QGraphicsRectItem(0, scene);
     pRectItem->setPen(QPen(Qt::black));

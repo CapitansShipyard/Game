@@ -48,12 +48,14 @@ int Fighter::AngleToEnemy(Fighter enemy)//возвращает угол убег
 {
     Coord vector=enemy.GetCoord()-MyCoord;
     Coord Yvector;
+    vector.Y *=-1;
     Yvector.X=1; Yvector.Y=0;
-    float cosA=vector*Yvector/abs(vector)*abs(Yvector);
+    float cosA=(vector*Yvector)/(abs(vector)*abs(Yvector));
     int Angle=(int)(std::acos(cosA)*180.0/3.1415);
-    Angle+=180;
-    if(Angle>359)
-    {Angle-=360;}
+    if (vector.Y>0)
+       Angle=360-Angle;
+//    if(Angle>359)
+//      {Angle-=360;}
     return (Angle);
 }
 
