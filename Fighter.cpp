@@ -1,5 +1,6 @@
 #include <cmath>
 #include "arena.h"
+#include <cstdlib>
 
 Coord operator-(Coord a,Coord b)//сделал себе перегрузку для удобства
 {
@@ -54,8 +55,10 @@ int Fighter::AngleToEnemy(Fighter enemy)//возвращает угол убег
     int Angle=(int)(std::acos(cosA)*180.0/3.1415);
     if (vector.Y>0)
        Angle=360-Angle;
-//    if(Angle>359)
-//      {Angle-=360;}
+    Angle+=180;
+
+    if(Angle>359)
+      Angle=Angle-360;
     return (Angle);
 }
 
@@ -70,7 +73,7 @@ int Fighter::DesiredAngle(Arena a,Fighter enemy)//возвращает сред�
         {OppAngle+=360;}
     Delta1=Angle-FirstAngle;
     Delta2=OppAngle-FirstAngle;
-    if(std::abs(Delta1)>std::abs(Delta2))
+    if((std::abs(Delta1)>std::abs(Delta2))||(rand()%100<30))
         {Angle=OppAngle;}
     return(Angle);
 }
