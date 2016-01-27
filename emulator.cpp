@@ -4,27 +4,93 @@
 #include <sstream>
 
 using namespace std;
-const int razm=600;
+const int dnasize=600;
 
-typedef uint16_t word;
+typedef int16_t word;
 typedef unsigned char byte;
 
 class CPU
 {
 private:
     word ar;
-    word pc;
+    int pc;
     word bc;
     word de;
     word ix;
     byte f;
+    //структура регистра F
+    //хххххххх
+    //00000PCZ
+    void SetFlagC(bool C)
+    {
+        if (C)
+            f = f|2;
+        else
+            f = f&253;
+    }
+    void SetFlagZ(bool Z)
+    {
+        if (Z)
+            f = f|1;
+        else
+            f = f&254;
+    }
+    void SetFlagP(bool P)
+    {
+        if (P)
+            f = f|4;
+        else
+            f = f&251;
+    }
+    void SetFlags()
+    {
+        SetFlagC(0);
+        if (ar==0)
+            SetFlagZ(1);
+        else
+            SetFlagZ(0);
+        //добавить установку флага P
+
+    }
+    bool ZFlag()
+    {
+        if ((f&1)==0)
+            return false;
+        else
+            return true;
+    }
+    bool CFlag()
+    {
+        if ((f&2)==0)
+            return false;
+        else
+            return true;
+    }
+    bool PFlag()
+    {
+        if ((f&4)==0)
+            return false;
+        else
+            return true;
+    }
+
+    word GetIXValue(byte index)
+    {
+        return index;//дописать выборку из массива
+    }
+
     word GetWord(byte a, byte b)
     {
         return b*256+a;
     }
-    void IncPC()
+    void IncPC(int step)
     {
-        pc+=3;
+        step*=3;
+        pc+=step;
+        if (pc>dnasize)
+            pc=0;
+        if (pc<0)
+            pc=0;
     }
     char DecToHex(byte a)
     {
@@ -84,20 +150,554 @@ public:
         return s;
     }
 
-    int Execute(byte b1, byte b2, byte b3)
+    int Execute(byte b1, byte b2, byte b3)    
     {
+        word jump;
+        word temp;
+        int test;
         switch(b1)
         {
         case 0:
-            IncPC();
-            break;
+            IncPC(1);
         case 1:
-            return b2+b3;//заглушка
-        //место для исполняемого модуля
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            IncPC(jump);
+        case 2:
+            temp = (GetWord(b2,b3)-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            IncPC(1);
+        case 3:
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            IncPC(1);
+        case 4:
+            temp = (de-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            IncPC(1);
+        case 5:
+            temp = GetIXValue(b2);
+            temp-=ar;
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            IncPC(1);
+        case 6:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 7:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (!ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 8:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 9:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (!CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 10:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (PFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 11:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (!PFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 12:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (!ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 13:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (de-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (!ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
 
-        default:
-            IncPC();
-            break;
+        case 14:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 15:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (de-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 16:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (!CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 17:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (de-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (!CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 18:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 19:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            temp = (de-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 20:
+            jump = (b2<128)?b2:(b2-128)*(-1);
+            if (jump>0)
+                jump*=-1;
+            bc--;
+            if ((bc%256)!=0)
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+        case 21:
+            ar = GetWord(b2,b3);
+            SetFlags();
+            IncPC(1);
+        case 22:
+            bc= GetWord(b2,b3);
+            IncPC(1);
+        case 23:
+            de= GetWord(b2,b3);
+            IncPC(1);
+        case 24:
+            ar = GetIXValue(b2);
+            SetFlags();
+            IncPC(1);
+        case 25:
+            temp =GetWord(b2,b3);
+            ar+=temp;
+            SetFlags();
+            test = ar+temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 26:
+            ar+=bc;
+            SetFlags();
+            test = ar+bc;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 27:
+            ar+=de;
+            SetFlags();
+            test = ar+bc;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 28:
+            temp =GetIXValue(b2);
+            ar+=temp;
+            SetFlags();
+            test = ar+temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 29:
+            temp = GetWord(b2,b3);
+            ar-=temp;
+            SetFlags();
+            test = ar-temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 30:
+            ar-=bc;
+            SetFlags();
+            test = ar-bc;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 31:
+            ar-=de;
+            SetFlags();
+            test = ar-de;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 32:
+            temp = GetIXValue(b2);
+            ar-=temp;
+            SetFlags();
+            test = ar-temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 33:
+            temp =GetWord(b2,b3);
+            ar*=temp;
+            SetFlags();
+            test = ar*temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 34:
+            ar*=bc;
+            SetFlags();
+            test = ar*de;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 35:
+            ar*=de;
+            SetFlags();
+            test = ar*de;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 36:
+            temp =GetIXValue(b2);
+            ar*=temp;
+            SetFlags();
+            test = ar*temp;
+            if ((test>32767)||(test<-32767))
+                 SetFlagC(true);
+            IncPC(1);
+        case 37:
+            temp = GetWord(b2,b3);
+            ar/=temp;
+            SetFlags();
+            IncPC(1);
+        case 38:
+            ar/=bc;
+            SetFlags();
+            IncPC(1);
+        case 39:
+            ar/=de;
+            SetFlags();
+            IncPC(1);
+        case 40:
+            temp = GetIXValue(b2);
+            ar/=temp;
+            SetFlags();
+            IncPC(1);
+        case 41:
+            temp= GetWord(b2,b3);
+            ar%=temp;
+            SetFlags();
+            IncPC(1);
+        case 42:
+            ar%=bc;
+            SetFlags();
+            IncPC(1);
+        case 43:
+            ar%=bc;
+            SetFlags();
+            IncPC(1);
+        case 44:
+            temp = GetIXValue(b2);
+            ar%=temp;
+            SetFlags();
+            IncPC(1);
+        case 45:
+            test = ar;
+            ar++;
+            SetFlags();
+            if (ar<test)
+                SetFlagC(1);
+            IncPC(1);
+        case 46:
+            bc++;
+            IncPC(1);
+        case 47:
+            de++;
+            IncPC(1);
+        case 48:
+            test = ar;
+            ar--;
+            SetFlags();
+            if (ar>test)
+                SetFlagC(1);
+            IncPC(1);
+        case 49:
+            bc--;
+            IncPC(1);
+        case 50:
+            de--;
+            IncPC(1);
+        case 51:
+            temp = ar;
+            ar = bc;
+            bc = temp;
+            SetFlags();
+            IncPC(1);
+        case 52:
+            temp = ar;
+            ar = de;
+            de = temp;
+            SetFlags();
+            IncPC(1);
+        case 53:
+            temp = bc;
+            de = bc;
+            bc = temp;
+            SetFlags();
+            IncPC(1);
+        case 54:
+            srand(GetWord(b2,b3));
+            IncPC(1);
+        case 55:
+            ar = rand();
+            SetFlags();
+            IncPC(1);
+        case 56:
+            bc= rand();
+            IncPC(1);
+        case 57:
+            de=rand();
+            IncPC(1);
+/*        case 58:
+            return "LD_AR,ANGLE_TO_WALL";
+        case 59:
+            return "LD_AR,ANGLE_TO_ENEMY";
+        case 60:
+            return "RET_MOVE";
+        case 61:
+            return "RET_TURN";
+        case 62:
+            return "RET_HALT";
+        case 63:
+            return "RET_SOMETHING";
+*/        default:
+            IncPC(1);
         }
         return 0;
     }
@@ -297,7 +897,7 @@ public:
         case 53:
             return "EX_BC,DE";
         case 54:
-            ss <<"SEED:"<<GetWord(b2,b3)<<")";
+            ss <<"SEED:"<<GetWord(b2,b3);
             ss>>s;
             return s;
         case 55:
@@ -331,8 +931,8 @@ public:
 byte* ChromGen()
 {
 byte* Chrom;
-Chrom = new byte[razm];
-for (int i=0;i<razm;i++)
+Chrom = new byte[dnasize];
+for (int i=0;i<dnasize;i++)
     Chrom[i]= std::rand()%256;
 return Chrom;
 }
@@ -341,7 +941,7 @@ int main()
 {
    CPU cpu;
    byte* arr = ChromGen();
-   for (int i=0;i<razm;i+=3)
+   for (int i=0;i<dnasize;i+=3)
    {
        cout<<(i/3)<<'\t'<<cpu.GetHex(arr[i]%64)<<setw(4)<<cpu.GetHex(arr[i+1])<<setw(4)
           <<cpu.GetHex(arr[i+2])<<'\t'<<cpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
