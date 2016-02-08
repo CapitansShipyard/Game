@@ -10,7 +10,6 @@ private:
     int sizeY;
     int MaxAngle;
     int MaxMove;
-protected:
     Fighter Member1;
     Fighter Member2;
 public:
@@ -39,5 +38,9 @@ public:
     {Member1 = param;}
     void SetMemberTwo(Fighter param)
     {Member2 = param;}
+    Fighter GetMemberOne()
+    {return Member1;}
+    Fighter GetMemberTwo()
+    {return Member2;}
 };
 #endif // ARENA_H

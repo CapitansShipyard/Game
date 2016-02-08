@@ -1,7 +1,52 @@
 #ifndef FIGHTER_H
 #define FIGHTER_H
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <time.h>
+
+using namespace std;
+
+const int dnasize=6000;
+typedef int16_t word;
+typedef unsigned char byte;
+
 class Arena;
+class CPU
+{
+private:
+    word ar;
+    int pc;
+    word bc;
+    word de;
+    word ix;
+    byte f;
+    //структура регистра F
+    //хххххххх
+    //00000PCZ
+    void SetFlagC(bool C);
+    void SetFlagZ(bool Z);
+    void SetFlagP(bool P);
+    void SetFlags();
+    bool ZFlag();
+    bool CFlag();
+    bool PFlag();
+    word GetIXValue(byte index);
+    word GetWord(byte a, byte b);
+    void IncPC(int step);
+    char DecToHex(byte a);
+public:
+    word* IXArray;
+    void Reset();
+    int GetPC();
+    void SetPC(word arg);
+    void SetIX(word arg);
+    string GetHex(byte p);
+    int Execute(byte b1, byte b2, byte b3);
+    string GetMnemonic(byte b1, byte b2, byte b3);
+
+};
 
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
 {
@@ -29,6 +74,7 @@ public:
     Coord GetCoord();
     void SetCoord(Coord a);
     Action GetAction(Arena a,Fighter enemy);
+    CPU cpu;
 };
 
 #endif // FIGHTER_H

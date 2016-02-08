@@ -1,19 +1,17 @@
 //тестовый менеджер боя (С) 2016 Avenger
 //Прямоугольное поле, два участника в виде равнобедренных треугольников
-//параметры бойца: х,у координаты, угол в градусах, 0 - вверх
+//параметры бойца: х,у координаты, угол в градусах, 0 - вправо
 //за один такт боец может либо повернуться, либо передвинуться
 
 #include <QtGui>
 #include "arena.h"
 #include <cmath>
 
-int count = 0;
-
-const int Multiplier=4;
+const int Multiplier=4; //множитель размеров арены относительно окна
 const int WindowSizeX=700;
 const int WindowSizeY=500;
 const int ActionInterval = 20; //интервал опроса бойцов
-const int border = 28;
+const int border = 28; //рамка арены
 
 struct triangle
 {
@@ -145,7 +143,17 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
     tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
 }
 
-int main(int argc, char **argv)
+byte* ChromGen()
+{
+byte* Chrom;
+Chrom = new byte[dnasize];
+srand(time(0));
+for (int i=0;i<dnasize;i++)
+    Chrom[i]= std::rand()%256;
+return Chrom;
+}
+
+int main1(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,WindowSizeX,WindowSizeY));   
@@ -185,5 +193,43 @@ int main(int argc, char **argv)
     Timer1.startTimer(ActionInterval);
 
     return app.exec();
+}
+
+int main(int argc, char **argv)
+{
+   CPU cpu;
+
+   //инициализация блока IX
+   cpu.IXArray = new word [31];
+   cpu.IXArray[0] = 600;
+   cpu.IXArray[1] = 300;
+   cpu.IXArray[2] = 30;
+   cpu.IXArray[3] = 10;
+   cpu.IXArray[4] = 0;
+   cpu.IXArray[5] = 100;
+   cpu.IXArray[6] = 150;
+   for (int i = 7;i<32;i++)
+       cpu.IXArray[i] = 0;
+
+
+
+   cpu.Reset();
+   byte* arr = ChromGen();
+
+   int i = 0;
+   int step = 0;
+//   for (int i=0;i<dnasize;i+=3)
+   while (cpu.GetPC()<dnasize)
+   {
+       i = cpu.GetPC();
+       step++;
+       if (step>10000)
+          break;
+
+      // cout<<(i/3)<<'\t'<<cpu.GetHex(arr[i]%64)<<setw(4)<<cpu.GetHex(arr[i+1])<<setw(4)
+       //   <<cpu.GetHex(arr[i+2])<<'\t'<<cpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
+       cpu.Execute(arr[i]%64,arr[i+1],arr[i+2]);
+   }
+   return(0);
 }
 
