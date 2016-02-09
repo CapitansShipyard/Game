@@ -145,9 +145,9 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
 byte* ChromGen()
 {
 byte* Chrom;
-Chrom = new byte[dnasize];
+Chrom = new byte[_DNASIZE];
 srand(time(0));
-for (int i=0;i<dnasize;i++)
+for (int i=0;i<_DNASIZE;i++)
     Chrom[i]= std::rand()%256;
 return Chrom;
 }
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
    int i = 0;
    int step = 0;
 //   for (int i=0;i<dnasize;i+=3)
-   while (vpu.GetPC()<dnasize)
+   while (vpu.GetPC()<_DNASIZE)
    {
        i = vpu.GetPC();
        step++;

@@ -67,7 +67,7 @@ void VPU::IncPC(int step)
     {
         step*=3;
         pc+=step;
-        if (pc>dnasize)
+        if (pc>_DNASIZE)
             pc=0;
         if (pc<0)
             pc=0;

@@ -13,7 +13,7 @@
 #include <cstdlib>
 
 using namespace std;
-const int dnasize=6000;
+const int _DNASIZE=6000;
 typedef int16_t word;
 typedef unsigned char byte;
 
