@@ -1,19 +1,10 @@
 #ifndef FIGHTER_H
 #define FIGHTER_H
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <time.h>
-
-using namespace std;
-
-const int dnasize=6000;
-typedef int16_t word;
-typedef unsigned char byte;
+#include "common.h"
 
 class Arena;
-class CPU
+class VPU
 {
 private:
     word ar;
@@ -65,6 +56,7 @@ class Fighter
 private:
     Action Act;
     Coord MyCoord;
+    VPU vpu;
     int PreviousAct; //будем знать что делали раньше
     int AngleToWall(Arena a);//возвращает угол убегания от ближайшей стены
     int AngleToEnemy(Fighter enemy);//возвращает угол убегания от врага
@@ -73,8 +65,7 @@ public:
     Fighter();
     Coord GetCoord();
     void SetCoord(Coord a);
-    Action GetAction(Arena a,Fighter enemy);
-    CPU cpu;
+    Action GetAction(Arena a,Fighter enemy);    
 };
 
 #endif // FIGHTER_H

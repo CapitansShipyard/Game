@@ -1,31 +1,27 @@
-#include <cmath>
 #include "arena.h"
-#include <cstdlib>
 
-using namespace std;
-
-void CPU::SetFlagC(bool C)
+void VPU::SetFlagC(bool C)
     {
         if (C)
             f = f|2;
         else
             f = f&253;
     }
-void CPU::SetFlagZ(bool Z)
+void VPU::SetFlagZ(bool Z)
     {
         if (Z)
             f = f|1;
         else
             f = f&254;
     }
-void CPU::SetFlagP(bool P)
+void VPU::SetFlagP(bool P)
     {
         if (P)
             f = f|4;
         else
             f = f&251;
     }
-void CPU::SetFlags()
+void VPU::SetFlags()
     {
         SetFlagC(0);
         if (ar==0)
@@ -35,21 +31,21 @@ void CPU::SetFlags()
         //добавить установку флага P
 
     }
-bool CPU::ZFlag()
+bool VPU::ZFlag()
     {
         if ((f&1)==0)
             return false;
         else
             return true;
     }
-bool CPU::CFlag()
+bool VPU::CFlag()
     {
         if ((f&2)==0)
             return false;
         else
             return true;
     }
-bool CPU::PFlag()
+bool VPU::PFlag()
     {
         if ((f&4)==0)
             return false;
@@ -57,17 +53,17 @@ bool CPU::PFlag()
             return true;
     }
 
-word CPU::GetIXValue(byte index)
+word VPU::GetIXValue(byte index)
     {
         byte temp=index|31;
         return IXArray[temp];//дописать выборку из массива
     }
 
-word CPU::GetWord(byte a, byte b)
+word VPU::GetWord(byte a, byte b)
     {
         return b*256+a;
     }
-void CPU::IncPC(int step)
+void VPU::IncPC(int step)
     {
         step*=3;
         pc+=step;
@@ -76,7 +72,7 @@ void CPU::IncPC(int step)
         if (pc<0)
             pc=0;
     }
-char CPU::DecToHex(byte a)
+char VPU::DecToHex(byte a)
     {
     switch(a)
     {
@@ -116,7 +112,7 @@ char CPU::DecToHex(byte a)
     return '0';
     }
 
-void CPU::Reset()
+void VPU::Reset()
     {
         ar = 0;
         bc = 0;
@@ -125,13 +121,13 @@ void CPU::Reset()
         pc = 0;
         SetFlags();
     }
-int CPU::GetPC()
+int VPU::GetPC()
     {return pc;}
-void CPU::SetPC(word arg)
+void VPU::SetPC(word arg)
     {pc = arg;}
-void CPU::SetIX(word arg)
+void VPU::SetIX(word arg)
     {ix = arg;}
-string CPU::GetHex(byte p)
+string VPU::GetHex(byte p)
     {
         int a = p/16;
         int b = p%16;
@@ -144,7 +140,7 @@ string CPU::GetHex(byte p)
         return s;
     }
 
-int CPU::Execute(byte b1, byte b2, byte b3)
+int VPU::Execute(byte b1, byte b2, byte b3)
     {
         word jump;
         word temp;
@@ -771,7 +767,7 @@ int CPU::Execute(byte b1, byte b2, byte b3)
         }
         return 0;
     }
-string CPU::GetMnemonic(byte b1, byte b2, byte b3)
+string VPU::GetMnemonic(byte b1, byte b2, byte b3)
     {
         int jump;
         stringstream ss;

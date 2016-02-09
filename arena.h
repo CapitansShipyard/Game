@@ -1,6 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include "common.h"
 #include "fighter.h"
 
 class Arena

@@ -5,7 +5,6 @@
 
 #include <QtGui>
 #include "arena.h"
-#include <cmath>
 
 const int Multiplier=4; //множитель размеров арены относительно окна
 const int WindowSizeX=700;
@@ -197,38 +196,39 @@ int main1(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-   CPU cpu;
+   VPU vpu;
 
    //инициализация блока IX
-   cpu.IXArray = new word [31];
-   cpu.IXArray[0] = 600;
-   cpu.IXArray[1] = 300;
-   cpu.IXArray[2] = 30;
-   cpu.IXArray[3] = 10;
-   cpu.IXArray[4] = 0;
-   cpu.IXArray[5] = 100;
-   cpu.IXArray[6] = 150;
+
+
+   vpu.IXArray = new word [31];
+   vpu.IXArray[0] = 600;
+   vpu.IXArray[1] = 300;
+   vpu.IXArray[2] = 30;
+   vpu.IXArray[3] = 10;
+   vpu.IXArray[4] = 0;
+   vpu.IXArray[5] = 100;
+   vpu.IXArray[6] = 150;
    for (int i = 7;i<32;i++)
-       cpu.IXArray[i] = 0;
+      vpu.IXArray[i] = 0;
 
 
-
-   cpu.Reset();
+   vpu.Reset();
    byte* arr = ChromGen();
 
    int i = 0;
    int step = 0;
 //   for (int i=0;i<dnasize;i+=3)
-   while (cpu.GetPC()<dnasize)
+   while (vpu.GetPC()<dnasize)
    {
-       i = cpu.GetPC();
+       i = vpu.GetPC();
        step++;
        if (step>10000)
           break;
 
-      // cout<<(i/3)<<'\t'<<cpu.GetHex(arr[i]%64)<<setw(4)<<cpu.GetHex(arr[i+1])<<setw(4)
-       //   <<cpu.GetHex(arr[i+2])<<'\t'<<cpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
-       cpu.Execute(arr[i]%64,arr[i+1],arr[i+2]);
+      // cout<<(i/3)<<'\t'<<vpu.GetHex(arr[i]%64)<<setw(4)<<vpu.GetHex(arr[i+1])<<setw(4)
+       //   <<vpu.GetHex(arr[i+2])<<'\t'<<vpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
+       vpu.Execute(arr[i]%64,arr[i+1],arr[i+2]);
    }
    return(0);
 }
