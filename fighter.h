@@ -27,8 +27,8 @@ private:
     word GetWord(byte a, byte b);
     void IncPC(int step);
     char DecToHex(byte a);
-public:
     word* IXArray;
+public:    
     void Reset();
     int GetPC();
     void SetPC(word arg);
@@ -36,7 +36,14 @@ public:
     string GetHex(byte p);
     int Execute(byte b1, byte b2, byte b3);
     string GetMnemonic(byte b1, byte b2, byte b3);
-
+    word GetAR()
+    {return ar;}
+    word GetIXArrayValue(byte index)
+    {return IXArray[index];}
+    void SetIXArray(word* IXArr)
+    {IXArray = IXArr;}
+    int AngleToWall();
+    int AngleToEnemy();
 };
 
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
@@ -57,15 +64,18 @@ private:
     Action Act;
     Coord MyCoord;
     VPU vpu;
+    byte* dna;
     int PreviousAct; //будем знать что делали раньше
-    int AngleToWall(Arena a);//возвращает угол убегания от ближайшей стены
-    int AngleToEnemy(Fighter enemy);//возвращает угол убегания от врага
-    int DesiredAngle(Arena a,Fighter enemy);//возвращает средний угол между верхними двумя
+    int AngleToWall();//возвращает угол убегания от ближайшей стены
+    int AngleToEnemy();//возвращает угол убегания от врага
 public:
     Fighter();
     Coord GetCoord();
     void SetCoord(Coord a);
     Action GetAction(Arena a,Fighter enemy);    
+    void SetConstTable(word* ptrCT);
+    void SetDNA(byte* arr)
+    {dna = arr;}
 };
 
 #endif // FIGHTER_H

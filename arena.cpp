@@ -9,8 +9,15 @@
 const int Multiplier=4; //множитель размеров арены относительно окна
 const int WindowSizeX=700;
 const int WindowSizeY=500;
-const int ActionInterval = 20; //интервал опроса бойцов
+const int ActionInterval = 10; //интервал опроса бойцов
 const int border = 28; //рамка арены
+word* IXArray1;
+word* IXArray2;
+
+int sign(int n)
+{
+ return (n>=0)-(n<=0);
+}
 
 struct triangle
 {
@@ -24,6 +31,16 @@ struct triangle
 
 static Arena ar((WindowSizeX-border*2)*Multiplier,(WindowSizeY-border*2)*Multiplier,5,15);
 
+byte* ChromGen()
+{
+byte* Chrom;
+Chrom = new byte[_DNASIZE];
+srand(time(0));
+for (int i=0;i<_DNASIZE;i++)
+    Chrom[i]= std::rand()%256;
+return Chrom;
+}
+
 class MyTimer : public QObject {
 protected:
     QGraphicsScene* ActScene;
@@ -33,26 +50,49 @@ protected:
     virtual void timerEvent(QTimerEvent *)
         {
         double tAngle;
-        Fighter m1 = ar.GetMemberOne();
-        Action act1 = m1.GetAction(ar,ar.GetMemberTwo());
-        Fighter m2 = ar.GetMemberTwo();
-        Action act2 = m2.GetAction(ar,ar.GetMemberOne());
         int mX;
         int mY;
+        int movement;
+
+        Fighter m1 = ar.GetMemberOne();
+        Fighter m2 = ar.GetMemberTwo();
         Coord c1 = m1.GetCoord();
         Coord c2 = m2.GetCoord();
+
+        IXArray1[5] = c1.X;
+        IXArray1[6] = c1.Y;
+        IXArray1[7] = c2.X;
+        IXArray1[8] = c2.Y;
+        m1.SetConstTable(IXArray1);
+
+        IXArray2[5] = c2.X;
+        IXArray2[6] = c2.Y;
+        IXArray2[7] = c1.X;
+        IXArray2[8] = c1.Y;
+        m1.SetConstTable(IXArray1);
+
+        Action act1 = m1.GetAction(ar,ar.GetMemberTwo());
+        Action act2 = m2.GetAction(ar,ar.GetMemberOne());
+
         if (act1.ActionCode==1)//поворот
         {
-            c1.Angle+=act1.ActionRate;
+            if (act2.ActionRate<=ar.GetMaxAngle())
+                c2.Angle+=act2.ActionRate;
+            else
+                c2.Angle+=(ar.GetMaxAngle()*sign(act2.ActionRate));
             if (c1.Angle<0)
                 c1.Angle+=360;
             m1.SetCoord(c1);
         }
         else if (act1.ActionCode==0)
         {
+            if (act1.ActionRate<=ar.GetMaxMove())
+                movement = act1.ActionRate;
+            else
+                movement = ar.GetMaxMove();
             tAngle = c1.Angle*0.01745329251994329576923690768489;
-            mX = floor(cos(tAngle)*act1.ActionRate);
-            mY = floor(sin(tAngle)*act1.ActionRate);
+            mX = floor(cos(tAngle)*movement);
+            mY = floor(sin(tAngle)*movement);
             c1.X+=mX;
             c1.Y-=mY;
             if (c1.X<1)
@@ -65,10 +105,16 @@ protected:
                 c1.Y=ar.GetArenaSizeY()-1;
             m1.SetCoord(c1);
         }
+        else if (act1.ActionCode==2)//halt
+        {//do nothing
+        }
 
         if (act2.ActionCode==1)//поворот
         {
-            c2.Angle+=act2.ActionRate;
+            if (act2.ActionRate<=ar.GetMaxAngle())
+                c2.Angle+=act2.ActionRate;
+            else
+                c2.Angle+=(ar.GetMaxAngle()*sign(act2.ActionRate));
             if (c2.Angle<0)
                 c2.Angle+=360;
 
@@ -76,9 +122,14 @@ protected:
         }
         else if (act2.ActionCode==0)
         {
+            if (act2.ActionRate<=ar.GetMaxMove())
+                movement = act2.ActionRate;
+            else
+                movement = ar.GetMaxMove();
+
             tAngle= c2.Angle*0.01745329251994329576923690768489;
-            mX = trunc(cos(tAngle)*act2.ActionRate);
-            mY = trunc(sin(tAngle)*act2.ActionRate);
+            mX = trunc(cos(tAngle)*movement);
+            mY = trunc(sin(tAngle)*movement);
             c2.X+=mX;
             c2.Y-=mY;
             if (c2.X<1)
@@ -91,6 +142,10 @@ protected:
                 c2.Y=ar.GetArenaSizeY()-1;
             m2.SetCoord(c2);
         }
+        else if (act2.ActionCode==2)//halt
+        {//do nothing
+        }
+
         ActScene->removeItem(tr1);
         ActScene->removeItem(tr2);
         delete tr1;
@@ -127,6 +182,7 @@ protected:
         tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
         ar.SetMemberOne(m1);
         ar.SetMemberTwo(m2);
+        ar.IncTickCount();
     }
 
 public:
@@ -142,22 +198,17 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
     tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
 }
 
-byte* ChromGen()
-{
-byte* Chrom;
-Chrom = new byte[_DNASIZE];
-srand(time(0));
-for (int i=0;i<_DNASIZE;i++)
-    Chrom[i]= std::rand()%256;
-return Chrom;
-}
-
-int main1(int argc, char **argv)
+int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,WindowSizeX,WindowSizeY));   
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+
     QGraphicsView view(scene);
     view.setWindowTitle("Battle manager");
+    view.setRenderHint(QPainter::Antialiasing);
+    view.setCacheMode(QGraphicsView::CacheBackground);
+    view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 
     QGraphicsRectItem* pRectItem = new QGraphicsRectItem(0, scene);
     pRectItem->setPen(QPen(Qt::black));
@@ -169,19 +220,55 @@ int main1(int argc, char **argv)
     pRectItem2->setBrush(QBrush(Qt::white));
     pRectItem2->setRect(QRectF(9,9,WindowSizeX-18,WindowSizeY-18));
 
-    Coord Coords;
-    Coords.X = 10;
-    Coords.Y = ar.GetArenaSizeY()/2;
-    Coords.Angle =0;
+    Coord CoordsM1;
+    CoordsM1.X = 10;
+    CoordsM1.Y = ar.GetArenaSizeY()/2;
+    CoordsM1.Angle =0;
+
+    Coord CoordsM2;
+    CoordsM2.X = ar.GetArenaSizeX()-10;
+    CoordsM2.Y = ar.GetArenaSizeY()/2;
+    CoordsM2.Angle = 180;
 
     Fighter m1;
-    m1.SetCoord(Coords);
+    m1.SetCoord(CoordsM1);
+    byte* dna1 = ChromGen();
+    m1.SetDNA(dna1);
+
+    IXArray1 = new word [31];
+    IXArray1[0] = ar.GetArenaSizeX();
+    IXArray1[1] = ar.GetArenaSizeY();
+    IXArray1[2] = ar.GetMaxAngle();
+    IXArray1[3] = ar.GetMaxMove();
+    IXArray1[4] = 0;
+    IXArray1[5] = CoordsM1.X;
+    IXArray1[6] = CoordsM1.Y;
+    IXArray1[7] = CoordsM2.X;
+    IXArray1[8] = CoordsM2.Y;
+    for (int i = 9;i<32;i++)
+      IXArray1[i] = 0;
+
+    m1.SetConstTable(IXArray1);
 
     Fighter m2;
-    Coords.X = ar.GetArenaSizeX()-10;
-    Coords.Y = ar.GetArenaSizeY()/2;
-    Coords.Angle = 180;
-    m2.SetCoord(Coords);
+    m2.SetCoord(CoordsM2);
+    byte* dna2 = ChromGen();
+    m2.SetDNA(dna2);
+
+    IXArray2 = new word [31];
+    IXArray2[0] = ar.GetArenaSizeX();
+    IXArray2[1] = ar.GetArenaSizeY();
+    IXArray2[2] = ar.GetMaxAngle();
+    IXArray2[3] = ar.GetMaxMove();
+    IXArray2[4] = 0;
+    IXArray2[5] = CoordsM2.X;
+    IXArray2[6] = CoordsM2.Y;
+    IXArray2[7] = CoordsM1.X;
+    IXArray2[8] = CoordsM1.Y;
+    for (int i = 9;i<32;i++)
+      IXArray2[i] = 0;
+
+    m2.SetConstTable(IXArray2);
 
     ar.SetMemberOne(m1);
     ar.SetMemberTwo(m2);
@@ -192,44 +279,5 @@ int main1(int argc, char **argv)
     Timer1.startTimer(ActionInterval);
 
     return app.exec();
-}
-
-int main(int argc, char **argv)
-{
-   VPU vpu;
-
-   //инициализация блока IX
-
-
-   vpu.IXArray = new word [31];
-   vpu.IXArray[0] = 600;
-   vpu.IXArray[1] = 300;
-   vpu.IXArray[2] = 30;
-   vpu.IXArray[3] = 10;
-   vpu.IXArray[4] = 0;
-   vpu.IXArray[5] = 100;
-   vpu.IXArray[6] = 150;
-   for (int i = 7;i<32;i++)
-      vpu.IXArray[i] = 0;
-
-
-   vpu.Reset();
-   byte* arr = ChromGen();
-
-   int i = 0;
-   int step = 0;
-//   for (int i=0;i<dnasize;i+=3)
-   while (vpu.GetPC()<_DNASIZE)
-   {
-       i = vpu.GetPC();
-       step++;
-       if (step>10000)
-          break;
-
-      // cout<<(i/3)<<'\t'<<vpu.GetHex(arr[i]%64)<<setw(4)<<vpu.GetHex(arr[i+1])<<setw(4)
-       //   <<vpu.GetHex(arr[i+2])<<'\t'<<vpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
-       vpu.Execute(arr[i]%64,arr[i+1],arr[i+2]);
-   }
-   return(0);
 }
 

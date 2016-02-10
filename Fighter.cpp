@@ -739,29 +739,31 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             IncPC(1);
             break;
         case 58:
-            cout<< "LD_AR,ANGLE_TO_WALL"<<endl;
+            ar = AngleToWall();
+//            cout<< "LD_AR,ANGLE_TO_WALL"<<endl;
             IncPC(1);
             break;
         case 59:
-            cout<< "LD_AR,ANGLE_TO_ENEMY"<<endl;
+            ar = AngleToEnemy();
+//            cout<< "LD_AR,ANGLE_TO_ENEMY"<<endl;
             IncPC(1);
             break;
         case 60:
-            cout<<"RET_MOVE"<<endl;
+//            cout<<"RET_MOVE"<<endl;
             IncPC(1);
-            break;
+            return(1);
         case 61:
-            cout<<"RET_TURN"<<endl;
+  //          cout<<"RET_TURN"<<endl;
             IncPC(1);
-            break;
+            return(2);
         case 62:
-            cout<< "RET_HALT"<<endl;
+//            cout<< "RET_HALT"<<endl;
             IncPC(1);
-            break;
+            return(3);
         case 63:
-            cout<< "RET_SOMETHING"<<endl;
+//            cout<< "RET_SOMETHING"<<endl;
             IncPC(1);
-            break;
+            return(1);//временно
         default:
             IncPC(1);
         }
@@ -992,9 +994,6 @@ string VPU::GetMnemonic(byte b1, byte b2, byte b3)
 
     }
 
-
-
-
 Coord operator-(Coord a,Coord b)//сделал себе перегрузку для удобства
 {
     Coord c;
@@ -1009,66 +1008,54 @@ float operator*(Coord a,Coord b)
     return(c);
 }
 
-float abs(Coord a)
+float absVect(Coord a)
 {
 	return((float)(std::sqrt(std::pow(a.X,2)+std::pow(a.Y,2))));
 }
 
-int Fighter::AngleToWall(Arena a)//возвращает угол убегания от ближайшей стены
+int VPU::AngleToWall()//возвращает угол от стены
 {
     int walls[4][2];
     int temp[2];
+    Coord MyCoord;
+    MyCoord.X = GetIXArrayValue(5);
+    MyCoord.Y = GetIXArrayValue(6);
 
     walls[0][0]=MyCoord.Y; walls[0][1]=270;
-    walls[1][0]=a.GetArenaSizeX()-MyCoord.X; walls[1][1]=180;
-    walls[2][0]=a.GetArenaSizeY()-MyCoord.Y; walls[2][1]=90;
+    walls[1][0]=GetIXArrayValue(0)-MyCoord.X; walls[1][1]=180;
+    walls[2][0]=GetIXArrayValue(1)-MyCoord.Y; walls[2][1]=90;
     walls[3][0]=MyCoord.X; walls[3][1]=0;
-    for(int n=3;n>0;n--)//сортируем расстояния до стен
-    {
-        for(int i=0;i<n;i++)
-        {
-            if(walls[i][0]>walls[i+1][0])
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3-i; j++)
+           if(walls[j][0]>walls[j+1][0])
             {
-                temp[0]=walls[i+1][0]; temp[1]=walls[i+1][1];
-                walls[i+1][0]=walls[i][0]; walls[i+1][1]=walls[i][1];
-                walls[i][0]=temp[0]; walls[i][1]=temp[1];
+                temp[0]=walls[j+1][0]; temp[1]=walls[j+1][1];
+                walls[j+1][0]=walls[j][0]; walls[j+1][1]=walls[j][1];
+                walls[j][0]=temp[0]; walls[j][1]=temp[1];
             }
-        }
-    }
+
     return(walls[0][1]);//возвращаем значение угла из отсортированного списка стен
 }
 
-int Fighter::AngleToEnemy(Fighter enemy)//возвращает угол убегания от врага
+int VPU::AngleToEnemy()//возвращает угол К врагу
 {
-    Coord vector=enemy.GetCoord()-MyCoord;
-    Coord Yvector;
-    vector.Y *=-1;
-    Yvector.X=1; Yvector.Y=0;
-    float cosA=(vector*Yvector)/(abs(vector)*abs(Yvector));
-    int Angle=(int)(std::acos(cosA)*180.0/3.1415);
+    Coord ECoords;
+    Coord MyCoord;
+    MyCoord.X = GetIXArrayValue(5);
+    MyCoord.Y = GetIXArrayValue(6);
+    ECoords.X = GetIXArrayValue(7);
+    ECoords.Y = GetIXArrayValue(8);
+
+    Coord vector=ECoords-MyCoord;
+    Coord Xvector;
+    Xvector.X=1; Xvector.Y=0;
+    float cosA=(vector*Xvector)/(absVect(vector)*absVect(Xvector));
+    int Angle=trunc(std::acos(cosA)*180.0/Pi);
     if (vector.Y>0)
-       Angle=360-Angle;
-    Angle+=180;
+       Angle=360-Angle;//т.к. косинус определен на промежутке от 0 до 180
 
-    if(Angle>359)
-      Angle=Angle-360;
     return (Angle);
-}
-
-int Fighter::DesiredAngle(Arena a,Fighter enemy)//возвращает средний угол между верхними двумя
-{
-    int FirstAngle=AngleToEnemy(enemy);
-    int SecondAngle=AngleToWall(a);
-    int Angle=(FirstAngle+SecondAngle)/2;
-    int Delta1; int Delta2;
-    int OppAngle=Angle-180;
-    if (OppAngle<0)
-        {OppAngle+=360;}
-    Delta1=Angle-FirstAngle;
-    Delta2=OppAngle-FirstAngle;
-    if((std::abs(Delta1)>std::abs(Delta2))||(rand()%100<30))//some random for fun
-        {Angle=OppAngle;}
-    return(Angle);
 }
 
 Fighter::Fighter()
@@ -1079,6 +1066,7 @@ Fighter::Fighter()
 	MyCoord.X=0;
 	MyCoord.Y=0;
 	MyCoord.Angle=0;
+    vpu.Reset();
 	}
 Coord Fighter::GetCoord()
 	{
@@ -1090,36 +1078,47 @@ void Fighter::SetCoord(Coord a)
 }
 Action Fighter::GetAction(Arena a,Fighter enemy)
 {
-	if(PreviousAct==0)
-	{
-		int DeltaAngle=0;
-		DeltaAngle=DesiredAngle(a,enemy)-MyCoord.Angle;
-		if(DeltaAngle<-180)
-		{DeltaAngle+=360;}
-		if(DeltaAngle>180)
-		{DeltaAngle-=360;}
-		if(DeltaAngle<0 && -DeltaAngle>a.GetMaxAngle())
-		{DeltaAngle=-a.GetMaxAngle();}
-		if(DeltaAngle>0 && DeltaAngle>a.GetMaxAngle())
-		{DeltaAngle=a.GetMaxAngle();}
-		if(fabs(DeltaAngle)<5)
-		{
-			PreviousAct=0;
-			Act.ActionCode=0;
-			Act.ActionRate=a.GetMaxMove();
-		}
-		else
-		{
-			PreviousAct=1;
-			Act.ActionCode=1;
-			Act.ActionRate=DeltaAngle;
-		}
-	}
-	else
-	{
-		PreviousAct=0;
-		Act.ActionCode=0;
-		Act.ActionRate=a.GetMaxMove();//пускай газует на полную
-	}
+    //основная процедура исполняемого кода бойца
+    //процессор должен быть настроен, выполнение продолжается с момента последнего прерывания
+    //должна быть реализована защита от зависания
+    int i = 0;
+    int step = 0;
+    int RetCode;
+    bool stop;
+    stop = false;
+    Act.ActionCode = 2;
+    Act.ActionRate = 0;
+
+    while ((step<6000)&&(!stop))//настроить
+    {
+        i = vpu.GetPC();
+        step++;
+
+       // cout<<(i/3)<<'\t'<<vpu.GetHex(arr[i]%64)<<setw(4)<<vpu.GetHex(arr[i+1])<<setw(4)
+        //   <<vpu.GetHex(arr[i+2])<<'\t'<<vpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
+        RetCode = vpu.Execute(dna[i]%64,dna[i+1],dna[i+2]);
+        switch(RetCode)
+        {
+        case 1:
+            Act.ActionCode = 0;
+            Act.ActionRate = (vpu.GetAR()&63);
+            stop = true;
+            break;
+        case 2:
+            Act.ActionCode = 1;
+            Act.ActionRate = (vpu.GetAR()&511);
+            stop = true;
+            break;
+        case 3:
+            Act.ActionCode = 2;
+            Act.ActionRate = 0;
+            stop = true;
+        }
+    }
+
 	return (Act);
+}
+void Fighter::SetConstTable(word* ptrCT)
+{
+    vpu.SetIXArray(ptrCT);
 }

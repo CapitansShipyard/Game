@@ -11,11 +11,12 @@ private:
     int sizeY;
     int MaxAngle;
     int MaxMove;
+    int TickCount;
     Fighter Member1;
     Fighter Member2;
 public:
     Arena(int pX, int pY, int MAngle, int MMove):
-        sizeX(pX), sizeY(pY), MaxAngle(MAngle), MaxMove(MMove)
+        sizeX(pX), sizeY(pY), MaxAngle(MAngle), MaxMove(MMove), TickCount(0)
     {}
     ~Arena()
     {}
@@ -43,5 +44,9 @@ public:
     {return Member1;}
     Fighter GetMemberTwo()
     {return Member2;}
+    void IncTickCount()
+    {TickCount++;}
+    int GetBattleTime()
+    {return TickCount;}
 };
 #endif // ARENA_H
