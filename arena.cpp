@@ -10,7 +10,7 @@ const int _MULTIPLIER=4; //множитель размеров арены отн
 const int _WINDOW_SIZE_X=700;
 const int _WINDOW_SIZE_Y=500;
 const int _ACTION_INTERVAL = 10; //интервал опроса бойцов
-const int _BORDER = 28; //рамка арены
+const int _BORDER = 35; //рамка арены
 
 word* IXArray1;
 word* IXArray2;
@@ -28,7 +28,6 @@ byte* ChromGen()
 {
 byte* Chrom;
 Chrom = new byte[_DNASIZE];
-srand(time(0));
 for (unsigned int i=0;i<_DNASIZE;i++)
     Chrom[i]= std::rand()%256;
 return Chrom;
@@ -182,7 +181,7 @@ protected:
         ar.SetMemberOne(m1);
         ar.SetMemberTwo(m2);
         ar.IncTickCount();
-        TickLabel->setText(QString::number(ar.GetBattleTime()));
+        TickLabel->setText("Tick: "+QString::number(ar.GetBattleTime()));
     }
 
 public:
@@ -200,6 +199,7 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
 
 void Arena::Initialization()
 {
+    srand(time(0));
     Coord CoordsM1;
     CoordsM1.X = 10;
     CoordsM1.Y = GetArenaSizeY()/2;
@@ -275,12 +275,12 @@ int main(int argc, char **argv)
 
     QGraphicsRectItem* pRectItem2 = new QGraphicsRectItem(0, scene);
     pRectItem2->setPen(QPen(Qt::black));
-    pRectItem2->setBrush(QBrush(Qt::white));
-    pRectItem2->setRect(QRectF(9,20,_WINDOW_SIZE_X-18,_WINDOW_SIZE_Y-29));
+    pRectItem2->setBrush(QBrush(Qt::cyan));
+    pRectItem2->setRect(QRectF(20,20,_WINDOW_SIZE_X-40,_WINDOW_SIZE_Y-40));
 
-    TickLabel = new QLabel("000000");
+    TickLabel = new QLabel("0000000000");
     TickLabel->setAlignment(Qt::AlignHCenter);
-    TickLabel->move(_WINDOW_SIZE_X/2-30,3);
+    TickLabel->move(_WINDOW_SIZE_X/2-45,3);
     TickLabel->setStyleSheet("background-color: yellow");
 
     scene->addWidget(TickLabel);
