@@ -16,11 +16,13 @@ word* IXArray1;
 word* IXArray2;
 
 int sign(int n)
-{
- return (n>=0)-(n<=0);
+{    
+ return (n<=32767)-(n>=32767);
 }
 
 Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,15);
+
+QLabel *TickLabel;
 
 byte* ChromGen()
 {
@@ -54,12 +56,14 @@ protected:
         IXArray1[_IX_MY_COORD_Y] = c1.Y;
         IXArray1[_IX_ENEMY_COORD_X] = c2.X;
         IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
+        IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
         m1.SetConstTable(IXArray1);
 
         IXArray2[_IX_MY_COORD_X] = c2.X;
         IXArray2[_IX_MY_COORD_Y] = c2.Y;
         IXArray2[_IX_ENEMY_COORD_X] = c1.X;
         IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
+        IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
         m1.SetConstTable(IXArray1);
 
         Action act1 = m1.GetAction(ar);
@@ -67,12 +71,14 @@ protected:
 
         if (act1.ActionCode==_ACTION_TURN)
         {
-            if (act1.ActionRate<=ar.GetMaxAngle())
+            if (abs(act1.ActionRate)<=ar.GetMaxAngle())
                 c1.Angle+=act1.ActionRate;
             else
                 c1.Angle+=(ar.GetMaxAngle()*sign(act1.ActionRate));
             if (c1.Angle<0)
                 c1.Angle+=360;
+            if (c1.Angle>=360)
+                c1.Angle-=360;
             m1.SetCoord(c1);
         }
         else if (act1.ActionCode==_ACTION_MOVE)
@@ -102,13 +108,15 @@ protected:
 
         if (act2.ActionCode==_ACTION_TURN)
         {
-            if (act2.ActionRate<=ar.GetMaxAngle())
+            if (abs(act2.ActionRate)<=ar.GetMaxAngle())
                 c2.Angle+=act2.ActionRate;
             else
                 c2.Angle+=(ar.GetMaxAngle()*sign(act2.ActionRate));
             if (c2.Angle<0)
                 c2.Angle+=360;
-
+            if (c2.Angle>=360)
+                c2.Angle-=360;
+ //           cout<<act2.ActionRate<<endl;
             m2.SetCoord(c2);
         }
         else if (act2.ActionCode==_ACTION_MOVE)
@@ -174,6 +182,7 @@ protected:
         ar.SetMemberOne(m1);
         ar.SetMemberTwo(m2);
         ar.IncTickCount();
+        TickLabel->setText(QString::number(ar.GetBattleTime()));
     }
 
 public:
@@ -267,7 +276,14 @@ int main(int argc, char **argv)
     QGraphicsRectItem* pRectItem2 = new QGraphicsRectItem(0, scene);
     pRectItem2->setPen(QPen(Qt::black));
     pRectItem2->setBrush(QBrush(Qt::white));
-    pRectItem2->setRect(QRectF(9,9,_WINDOW_SIZE_X-18,_WINDOW_SIZE_Y-18));
+    pRectItem2->setRect(QRectF(9,20,_WINDOW_SIZE_X-18,_WINDOW_SIZE_Y-29));
+
+    TickLabel = new QLabel("000000");
+    TickLabel->setAlignment(Qt::AlignHCenter);
+    TickLabel->move(_WINDOW_SIZE_X/2-30,3);
+    TickLabel->setStyleSheet("background-color: yellow");
+
+    scene->addWidget(TickLabel);
 
     view.show();
 
