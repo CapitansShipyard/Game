@@ -4,6 +4,16 @@
 #include "common.h"
 #include "fighter.h"
 
+struct triangle
+{
+    int x1;
+    int x2;
+    int x3;
+    int y1;
+    int y2;
+    int y3;
+};
+
 class Arena
 {
 private:
@@ -20,6 +30,7 @@ public:
     {}
     ~Arena()
     {}
+    void Initialization();
     int GetArenaSizeX()
     {return sizeX;}
     int GetArenaSizeY()

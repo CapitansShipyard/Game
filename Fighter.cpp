@@ -56,7 +56,7 @@ bool VPU::PFlag()
 word VPU::GetIXValue(byte index)
     {
         byte temp=index|31;
-        return IXArray[temp];//дописать выборку из массива
+        return IXArray[temp];
     }
 
 word VPU::GetWord(byte a, byte b)
@@ -68,8 +68,6 @@ void VPU::IncPC(int step)
         step*=3;
         pc+=step;
         if (pc>_DNASIZE)
-            pc=0;
-        if (pc<0)
             pc=0;
     }
 char VPU::DecToHex(byte a)
@@ -1018,8 +1016,8 @@ int VPU::AngleToWall()//возвращает угол от стены
     int walls[4][2];
     int temp[2];
     Coord MyCoord;
-    MyCoord.X = GetIXArrayValue(5);
-    MyCoord.Y = GetIXArrayValue(6);
+    MyCoord.X = GetIXArrayValue(_IX_MY_COORD_X);
+    MyCoord.Y = GetIXArrayValue(_IX_MY_COORD_Y);
 
     walls[0][0]=MyCoord.Y; walls[0][1]=270;
     walls[1][0]=GetIXArrayValue(0)-MyCoord.X; walls[1][1]=180;
@@ -1042,16 +1040,16 @@ int VPU::AngleToEnemy()//возвращает угол К врагу
 {
     Coord ECoords;
     Coord MyCoord;
-    MyCoord.X = GetIXArrayValue(5);
-    MyCoord.Y = GetIXArrayValue(6);
-    ECoords.X = GetIXArrayValue(7);
-    ECoords.Y = GetIXArrayValue(8);
+    MyCoord.X = GetIXArrayValue(_IX_MY_COORD_X);
+    MyCoord.Y = GetIXArrayValue(_IX_MY_COORD_Y);
+    ECoords.X = GetIXArrayValue(_IX_ENEMY_COORD_X);
+    ECoords.Y = GetIXArrayValue(_IX_ENEMY_COORD_Y);
 
     Coord vector=ECoords-MyCoord;
     Coord Xvector;
     Xvector.X=1; Xvector.Y=0;
     float cosA=(vector*Xvector)/(absVect(vector)*absVect(Xvector));
-    int Angle=trunc(std::acos(cosA)*180.0/Pi);
+    int Angle=trunc(std::acos(cosA)*180.0/_PI);
     if (vector.Y>0)
        Angle=360-Angle;//т.к. косинус определен на промежутке от 0 до 180
 
@@ -1060,36 +1058,28 @@ int VPU::AngleToEnemy()//возвращает угол К врагу
 
 Fighter::Fighter()
 	{
-	PreviousAct=0;
-	Act.ActionCode=0;
+    Act.ActionCode=_ACTION_HALT;
 	Act.ActionRate=0;
 	MyCoord.X=0;
 	MyCoord.Y=0;
 	MyCoord.Angle=0;
     vpu.Reset();
 	}
-Coord Fighter::GetCoord()
-	{
-	return(MyCoord);
-	}
-void Fighter::SetCoord(Coord a)
-{
-	MyCoord=a;
-}
-Action Fighter::GetAction(Arena a,Fighter enemy)
+
+Action Fighter::GetAction(Arena a)
 {
     //основная процедура исполняемого кода бойца
     //процессор должен быть настроен, выполнение продолжается с момента последнего прерывания
     //должна быть реализована защита от зависания
-    int i = 0;
-    int step = 0;
+    unsigned int i = 0;
+    unsigned int step = 0;
     int RetCode;
-    bool stop;
-    stop = false;
-    Act.ActionCode = 2;
+    bool stop=false;
+
+    Act.ActionCode = _ACTION_HALT;
     Act.ActionRate = 0;
 
-    while ((step<6000)&&(!stop))//настроить
+    while ((step<_VPU_MAX_STEPS)&&(!stop))//настроить
     {
         i = vpu.GetPC();
         step++;
@@ -1100,17 +1090,17 @@ Action Fighter::GetAction(Arena a,Fighter enemy)
         switch(RetCode)
         {
         case 1:
-            Act.ActionCode = 0;
+            Act.ActionCode = _ACTION_MOVE;
             Act.ActionRate = (vpu.GetAR()&63);
             stop = true;
             break;
         case 2:
-            Act.ActionCode = 1;
-            Act.ActionRate = (vpu.GetAR()&511);
+            Act.ActionCode = _ACTION_TURN;
+            Act.ActionRate = (vpu.GetAR()&33279);
             stop = true;
             break;
         case 3:
-            Act.ActionCode = 2;
+            Act.ActionCode = _ACTION_HALT;
             Act.ActionRate = 0;
             stop = true;
         }

@@ -8,7 +8,7 @@ class VPU
 {
 private:
     word ar;
-    int pc;
+    unsigned int pc;
     word bc;
     word de;
     word ix;
@@ -48,8 +48,8 @@ public:
 
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
 {
-    int ActionCode;//0 для движения 1 для поворота
-    int ActionRate;// принимает значения от 0 до GetMaxMove() и GetMaxAngle()
+    int ActionCode;
+    int ActionRate;
 };
 struct Coord//структура координат
 {
@@ -65,14 +65,13 @@ private:
     Coord MyCoord;
     VPU vpu;
     byte* dna;
-    int PreviousAct; //будем знать что делали раньше
-    int AngleToWall();//возвращает угол убегания от ближайшей стены
-    int AngleToEnemy();//возвращает угол убегания от врага
 public:
     Fighter();
-    Coord GetCoord();
-    void SetCoord(Coord a);
-    Action GetAction(Arena a,Fighter enemy);    
+    Coord GetCoord()
+    {return(MyCoord);}
+    void SetCoord(Coord a)
+    {MyCoord=a;}
+    Action GetAction(Arena a);    
     void SetConstTable(word* ptrCT);
     void SetDNA(byte* arr)
     {dna = arr;}
