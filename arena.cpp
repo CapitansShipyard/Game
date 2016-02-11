@@ -9,7 +9,7 @@
 const int _MULTIPLIER=4; //множитель размеров арены относительно окна
 const int _WINDOW_SIZE_X=700;
 const int _WINDOW_SIZE_Y=500;
-const int _ACTION_INTERVAL = 2; //интервал опроса бойцов
+const int _ACTION_INTERVAL = 5; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
 
 word* IXArray1;
