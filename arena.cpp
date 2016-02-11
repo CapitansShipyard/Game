@@ -9,7 +9,7 @@
 const int _MULTIPLIER=4; //множитель размеров арены относительно окна
 const int _WINDOW_SIZE_X=700;
 const int _WINDOW_SIZE_Y=500;
-const int _ACTION_INTERVAL = 10; //интервал опроса бойцов
+const int _ACTION_INTERVAL = 2; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
 
 word* IXArray1;
@@ -182,6 +182,8 @@ protected:
         ar.SetMemberTwo(m2);
         ar.IncTickCount();
         TickLabel->setText("Tick: "+QString::number(ar.GetBattleTime()));
+        if (ar.GetBattleTime()==1000)
+            ar.Initialization();
     }
 
 public:
@@ -249,7 +251,7 @@ void Arena::Initialization()
       IXArray2[i] = 0;
 
     m2.SetConstTable(IXArray2);
-
+    TickCount =0;
     SetMemberOne(m1);
     SetMemberTwo(m2);
 
