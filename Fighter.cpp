@@ -1008,7 +1008,7 @@ float operator*(Coord a,Coord b)
 
 float absVect(Coord a)
 {
-	return((float)(std::sqrt(std::pow(a.X,2)+std::pow(a.Y,2))));
+    return((float)(std::sqrt(std::pow(a.X,2)+std::pow(a.Y,2))));
 }
 
 int VPU::AngleToWall()//возвращает угол от стены

@@ -12,8 +12,10 @@ const int _WINDOW_SIZE_Y=500;
 const int _ACTION_INTERVAL = 5; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
 
-word* IXArray1;
-word* IXArray2;
+ptrword IXArray1;
+ptrword IXArray2;
+ptrbyte chrom1;
+ptrbyte chrom2;
 
 int sign(int n)
 {    
@@ -23,15 +25,8 @@ int sign(int n)
 Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,15);
 
 QLabel *TickLabel;
-
-byte* ChromGen()
-{
-byte* Chrom;
-Chrom = new byte[_DNASIZE];
-for (unsigned int i=0;i<_DNASIZE;i++)
-    Chrom[i]= std::rand()%256;
-return Chrom;
-}
+QLabel *Score1Label;
+QLabel *Score2Label;
 
 class MyTimer : public QObject {
 protected:
@@ -46,27 +41,27 @@ protected:
         int mY;
         int movement;
 
-        Fighter m1 = ar.GetMemberOne();
-        Fighter m2 = ar.GetMemberTwo();
-        Coord c1 = m1.GetCoord();
-        Coord c2 = m2.GetCoord();
+        Fighter* m1 = ar.GetMemberOne();
+        Fighter* m2 = ar.GetMemberTwo();
+        Coord c1 = m1->GetCoord();
+        Coord c2 = m2->GetCoord();
 
         IXArray1[_IX_MY_COORD_X] = c1.X;
         IXArray1[_IX_MY_COORD_Y] = c1.Y;
         IXArray1[_IX_ENEMY_COORD_X] = c2.X;
         IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
-        m1.SetConstTable(IXArray1);
+        m1->SetConstTable(IXArray1);
 
         IXArray2[_IX_MY_COORD_X] = c2.X;
         IXArray2[_IX_MY_COORD_Y] = c2.Y;
         IXArray2[_IX_ENEMY_COORD_X] = c1.X;
         IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
-        m1.SetConstTable(IXArray1);
+        m1->SetConstTable(IXArray1);
 
-        Action act1 = m1.GetAction(ar);
-        Action act2 = m2.GetAction(ar);
+        Action act1 = m1->GetAction(ar);
+        Action act2 = m2->GetAction(ar);
 
         if (act1.ActionCode==_ACTION_TURN)
         {
@@ -78,7 +73,7 @@ protected:
                 c1.Angle+=360;
             if (c1.Angle>=360)
                 c1.Angle-=360;
-            m1.SetCoord(c1);
+            m1->SetCoord(c1);
         }
         else if (act1.ActionCode==_ACTION_MOVE)
         {
@@ -99,7 +94,7 @@ protected:
                 c1.X=ar.GetArenaSizeX()-1;
             if (c1.Y>(ar.GetArenaSizeY()-1))
                 c1.Y=ar.GetArenaSizeY()-1;
-            m1.SetCoord(c1);
+            m1->SetCoord(c1);
         }
         else if (act1.ActionCode==_ACTION_HALT)
         {//do nothing
@@ -116,7 +111,7 @@ protected:
             if (c2.Angle>=360)
                 c2.Angle-=360;
  //           cout<<act2.ActionRate<<endl;
-            m2.SetCoord(c2);
+            m2->SetCoord(c2);
         }
         else if (act2.ActionCode==_ACTION_MOVE)
         {
@@ -138,7 +133,7 @@ protected:
                 c2.X=ar.GetArenaSizeX()-1;
             if (c2.Y>(ar.GetArenaSizeY()-1))
                 c2.Y=ar.GetArenaSizeY()-1;
-            m2.SetCoord(c2);
+            m2->SetCoord(c2);
         }
         else if (act2.ActionCode==_ACTION_HALT)
         {//do nothing
@@ -180,10 +175,19 @@ protected:
         tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
         ar.SetMemberOne(m1);
         ar.SetMemberTwo(m2);
+
+        //посчитаем очки
+        float distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
+        float score1 = 1/distance;
+        float score2 = score1; //пока так
+        ar.SetScoreOne(ar.GetScoreOne()+score1);
+        ar.SetScoreTwo(ar.GetScoreTwo()+score2);
+        Score1Label->setText(QString::number(ar.GetScoreOne(),'f',5));
+        Score2Label->setText(QString::number(ar.GetScoreTwo(),'f',5));
         ar.IncTickCount();
         TickLabel->setText("Tick: "+QString::number(ar.GetBattleTime()));
         if (ar.GetBattleTime()==1000)
-            ar.Initialization();
+            ar.Initialization();        
     }
 
 public:
@@ -212,10 +216,15 @@ void Arena::Initialization()
     CoordsM2.Y = GetArenaSizeY()/2;
     CoordsM2.Angle = 180;
 
-    Fighter m1;
-    m1.SetCoord(CoordsM1);
-    byte* dna1 = ChromGen();
-    m1.SetDNA(dna1);
+    Fighter* m1 = ar.GetMemberOne();
+    Fighter* m2 = ar.GetMemberTwo();
+
+    m1->SetCoord(CoordsM1);
+
+    for (unsigned int i=0;i<_DNASIZE;i++)
+        chrom1[i]= std::rand()%256;
+
+    m1->SetDNA(chrom1);
 
     IXArray1 = new word [31];
     IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
@@ -230,12 +239,14 @@ void Arena::Initialization()
     for (int i = 9;i<32;i++)
       IXArray1[i] = 0;
 
-    m1.SetConstTable(IXArray1);
+    m1->SetConstTable(IXArray1);
 
-    Fighter m2;
-    m2.SetCoord(CoordsM2);
-    byte* dna2 = ChromGen();
-    m2.SetDNA(dna2);
+    m2->SetCoord(CoordsM2);
+
+    for (unsigned int i=0;i<_DNASIZE;i++)
+        chrom2[i]= std::rand()%256;
+
+    m2->SetDNA(chrom2);
 
     IXArray2 = new word [31];
     IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
@@ -250,10 +261,12 @@ void Arena::Initialization()
     for (int i = 9;i<32;i++)
       IXArray2[i] = 0;
 
-    m2.SetConstTable(IXArray2);
+    m2->SetConstTable(IXArray2);
     TickCount =0;
     SetMemberOne(m1);
     SetMemberTwo(m2);
+    SetScoreOne(0);
+    SetScoreTwo(0);
 
 }
 
@@ -283,11 +296,31 @@ int main(int argc, char **argv)
     TickLabel = new QLabel("0000000000");
     TickLabel->setAlignment(Qt::AlignHCenter);
     TickLabel->move(_WINDOW_SIZE_X/2-45,3);
-    TickLabel->setStyleSheet("background-color: yellow");
-
+    TickLabel->setStyleSheet("background-color: yellow");    
     scene->addWidget(TickLabel);
 
+    Score1Label = new QLabel("000000000000");
+    Score1Label->setAlignment(Qt::AlignCenter);
+    Score1Label->move(50,3);
+    Score1Label->setStyleSheet("background-color: yellow");
+    scene->addWidget(Score1Label);
+
+    Score2Label = new QLabel("000000000000");
+    Score2Label->setAlignment(Qt::AlignCenter);
+    Score2Label->move(_WINDOW_SIZE_X-120,3);
+    Score2Label->setStyleSheet("background-color: yellow");
+    scene->addWidget(Score2Label);
+
     view.show();
+
+    Fighter* m1 = new Fighter;
+    Fighter* m2 = new Fighter;
+
+    chrom1 = new byte[_DNASIZE];
+    chrom2 = new byte[_DNASIZE];
+
+    ar.SetMemberOne(m1);
+    ar.SetMemberTwo(m2);
 
     ar.Initialization();
 
