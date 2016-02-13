@@ -120,6 +120,7 @@ void Population::PopGen()
         ChromWrite(id,buffer);
 		id++;
 	}
+    delete(buffer);
 }
 Population::Population(int pSize, const char* PlayerNick)
 {
@@ -172,6 +173,8 @@ void Population::GetChrom(int id, ptrbyte pBuf)
 
     ptrbyte buffer = base64_decode(Chrom, razm*2);
     memcpy(pBuf, buffer, razm);
+    delete(buffer);
+    delete(Chrom);
 
 }
 
