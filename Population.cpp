@@ -77,9 +77,9 @@ base64_decode (unsigned char * S, int SIZE = 0)
 
 static int callback(void* HexChrom, int argc, char **argv, char **azColName)
     {
-    memcpy(HexChrom, argv[0], razm*2);
-    return 0;
-        }
+        memcpy(HexChrom, argv[0], razm*2);
+        return 0;
+    }
 
 ptrbyte Population::ChromGen()
 {
@@ -105,26 +105,26 @@ void Population::ChromWrite(int id, ptrbyte Chrom)
 	sql=tmp.c_str();
 	if (sqlite3_exec(db, sql,0,0,&err))
 	{
-		std::cout<<"Ошибка SQL: "<< err<<'\n';
+        std::cout<<"SQL Error: "<< err<<endl;
 		sqlite3_free(err);
 	}
 
 }
-void Population::PopGen(int i)
+void Population::PopGen(int pSize)
 {
 	int id = 100;
-	while(i>0)
+    while(pSize>0)
 	{
         ptrbyte buffer = ChromGen();
         ChromWrite(id,buffer);
 		id++;
-		i--;
+        pSize--;
 	}
 }
-Population::Population(int PopSize,const char* PlayerNick)
+Population::Population(int pSize, const char* PlayerNick)
 {
     char* err=0;
-	Population::PopSize=PopSize;
+    PopSize=pSize;
 	std::stringstream ss;
 	ss << PlayerNick << ".db";
     string FileName = ss.str();
@@ -134,10 +134,10 @@ Population::Population(int PopSize,const char* PlayerNick)
         {std::cout<< "DB Error open/create: "<< sqlite3_errmsg(db)<<'\n';}
 	else if (sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS population (id INTEGER PRIMARY KEY, chrom CHAR, fitness INTEGER);",0,0,&err))
 		{
-			std::cout<<"Ошибка SQL: "<< err<<'\n';
+            std::cout<<"SQL Error: "<< err<<endl;
 			sqlite3_free(err);
 		}
-	PopGen(PopSize);
+    PopGen(pSize);
 }
 void Population::WriteFitness(int id,int fitness)
 {
@@ -149,8 +149,8 @@ void Population::WriteFitness(int id,int fitness)
 
     if (sqlite3_exec(db,pQuery,0,0,&err))
 	{
-	std::cout<<"Ошибка SQL: "<< err<<'\n';
-	sqlite3_free(err);
+        std::cout<<"SQL Error: "<< err<<endl;
+        sqlite3_free(err);
 	}
 }
 
@@ -165,12 +165,12 @@ byte* Population::GetChrom(int id)
 
     if (sqlite3_exec(db,pQuery,callback,Chrom,&err))
 	{
-	std::cout<<"Ошибка SQL: "<< err<<'\n';
-	sqlite3_free(err);
+        std::cout<<"SQL Error: "<< err<<endl;;
+        sqlite3_free(err);
 	}
 	ss.str(std::string());
 
-    return (base64_decode(Chrom,razm));
+    return (base64_decode(Chrom, razm));
 
 }
 Population::~Population()

@@ -11,9 +11,9 @@ private:
     ptrbyte ChromGen();
     void ChromWrite(int id, ptrbyte Chrom);
 public:
-	Population(int PopSize,const char* PlayerNick);
+    Population(int pSize,const char* PlayerNick);
 	~Population();
-	void PopGen(int PopSize);
+    void PopGen(int pSize);
 	void WriteFitness(int id,int fitness);
 	byte* GetChrom(int id);
 };
