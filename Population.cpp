@@ -83,10 +83,10 @@ static int callback(void* HexChrom, int argc, char **argv, char **azColName)
 
 ptrbyte Population::ChromGen()
 {
-    ptrbyte buffer = new byte[razm];
+    ptrbyte buf = new byte[razm];
     for (int i=0;i<razm;i++)
-        buffer[i]=std::rand()%256;
-    return buffer;
+        buf[i]=std::rand()%256;
+    return buf;
 }
 
 void Population::ChromWrite(int id, ptrbyte Chrom)
@@ -113,9 +113,10 @@ void Population::ChromWrite(int id, ptrbyte Chrom)
 void Population::PopGen(int pSize)
 {
 	int id = 100;
+    ptrbyte buffer;
     while(pSize>0)
 	{
-        ptrbyte buffer = ChromGen();
+        buffer = ChromGen();
         ChromWrite(id,buffer);
 		id++;
         pSize--;
@@ -154,7 +155,7 @@ void Population::WriteFitness(int id,int fitness)
 	}
 }
 
-byte* Population::GetChrom(int id)
+void Population::GetChrom(int id, ptrbyte pBuf)
 {
     char* err=0;
     std::stringstream ss;
@@ -168,9 +169,9 @@ byte* Population::GetChrom(int id)
         std::cout<<"SQL Error: "<< err<<endl;;
         sqlite3_free(err);
 	}
-	ss.str(std::string());
 
-    return (base64_decode(Chrom, razm));
+    ptrbyte buffer = base64_decode(Chrom, razm*2);
+    memcpy(pBuf, buffer, razm);
 
 }
 Population::~Population()

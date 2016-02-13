@@ -2,7 +2,7 @@
 #define POPULATION_H_
 #include "common.h"
 
-const int razm=5;
+const int razm=8;
 
 class Population {
 private:
@@ -15,7 +15,7 @@ public:
 	~Population();
     void PopGen(int pSize);
 	void WriteFitness(int id,int fitness);
-	byte* GetChrom(int id);
+    void GetChrom(int id, ptrbyte pBuf);
 };
 
 #endif /* POPULATION_H_ */
