@@ -3,11 +3,13 @@ HEADERS += \
     common.h \
     arena.h \
     sqlite3.h \
-    Population.h
+    Population.h \
+    base64.h
 
 SOURCES += \
     Fighter.cpp \
     arena.cpp \
     sqlite3.c \
     Population.cpp \
-    PopDB.cpp
+    PopDB.cpp \
+    base64.cpp

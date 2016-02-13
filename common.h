@@ -29,9 +29,6 @@ const unsigned int _VPU_MAX_STEPS = 10000; //Защита от зависани�
 const double _PI = 3.14159265358979323846264338327950288419717;
 const double _180_DIV_PI = 0.01745329251994329576923690768489;
 
-const static char base64ABC[] =
-"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
 //константы, относящиеся к индексному массиву IX
 const byte _IX_ARENA_SIZE_X = 0;
 const byte _IX_ARENA_SIZE_Y = 1;
