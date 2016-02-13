@@ -110,16 +110,15 @@ void Population::ChromWrite(int id, ptrbyte Chrom)
 	}
 
 }
-void Population::PopGen(int pSize)
+void Population::PopGen()
 {
 	int id = 100;
     ptrbyte buffer;
-    while(pSize>0)
+    for (int i =0;i<PopSize;i++)
 	{
         buffer = ChromGen();
         ChromWrite(id,buffer);
 		id++;
-        pSize--;
 	}
 }
 Population::Population(int pSize, const char* PlayerNick)
@@ -138,7 +137,8 @@ Population::Population(int pSize, const char* PlayerNick)
             std::cout<<"SQL Error: "<< err<<endl;
 			sqlite3_free(err);
 		}
-    PopGen(pSize);
+    ClearDB();
+    PopGen();
 }
 void Population::WriteFitness(int id,int fitness)
 {
@@ -174,6 +174,23 @@ void Population::GetChrom(int id, ptrbyte pBuf)
     memcpy(pBuf, buffer, razm);
 
 }
+
+void Population::ClearDB()
+{
+    char* err=0;
+    std::stringstream ss;
+    ss <<"DELETE FROM population;";
+    string Query = ss.str();
+    const char* pQuery= Query.c_str();
+
+    if (sqlite3_exec(db,pQuery,0,0,&err))
+    {
+        std::cout<<"SQL Error: "<< err<<endl;;
+        sqlite3_free(err);
+    }
+
+}
+
 Population::~Population()
 {
 	sqlite3_close(db);
