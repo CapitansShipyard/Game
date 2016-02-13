@@ -4,6 +4,7 @@
 #include "common.h"
 
 class Arena;
+
 class VPU
 {
 private:
@@ -51,6 +52,7 @@ struct Action//структура действий, для оператора re
     int ActionCode;
     int ActionRate;
 };
+
 struct Coord//структура координат
 {
     int X;

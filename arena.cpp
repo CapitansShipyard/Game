@@ -270,7 +270,7 @@ void Arena::Initialization()
 
 }
 
-int main1(int argc, char **argv)
+int main_not_used(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,_WINDOW_SIZE_X,_WINDOW_SIZE_Y));
