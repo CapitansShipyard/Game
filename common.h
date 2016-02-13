@@ -11,6 +11,9 @@
 #include <time.h>
 #include <cmath>
 #include <cstdlib>
+#include <stdio.h>
+#include <sqlite3.h>
+#include <cstring>
 
 using namespace std;
 
@@ -18,11 +21,16 @@ typedef int16_t word;
 typedef unsigned char byte;
 typedef word* ptrword;
 typedef byte* ptrbyte;
+typedef struct sqlite3 sqlite3;
+typedef unsigned char uchar_t;
 
 const unsigned int _DNASIZE=30000; //размер ДНК в байтах, кратно 3 (<32768 на данный момент)
 const unsigned int _VPU_MAX_STEPS = 10000; //Защита от зависания VPU
 const double _PI = 3.14159265358979323846264338327950288419717;
 const double _180_DIV_PI = 0.01745329251994329576923690768489;
+
+const static char base64ABC[] =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 //константы, относящиеся к индексному массиву IX
 const byte _IX_ARENA_SIZE_X = 0;

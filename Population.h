@@ -1,19 +1,17 @@
 #ifndef POPULATION_H_
 #define POPULATION_H_
-typedef struct sqlite3 sqlite3;
+#include "common.h"
+
 const int razm=5;
-typedef unsigned char byte;
+
 class Population {
 private:
 	int PopSize;
 	const char* PlayerDB;
 	char* err=0;
 	sqlite3 *db;
-	byte Chrom[razm];
-	void ChromGen();
-	void ChromWrite(int id);
-	char DecToHex(byte a);
-	void HexToDec(char* HexChrom);
+    ptrbyte ChromGen();
+    void ChromWrite(int id, ptrbyte Chrom);
 public:
 	Population(int PopSize,const char* PlayerNick);
 	~Population();

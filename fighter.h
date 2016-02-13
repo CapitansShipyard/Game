@@ -72,7 +72,8 @@ public:
     void SetCoord(Coord a)
     {MyCoord=a;}
     Action GetAction(Arena a);    
-    void SetConstTable(word* ptrCT);
+    void SetConstTable(word* ptrCT)
+    {vpu.SetIXArray(ptrCT);}
     void SetDNA(byte* arr)
     {dna = arr;}
 };

@@ -1,181 +1,101 @@
-
 #include "Population.h"
-#include <iostream>
-#include <cstdlib>
-#include <sqlite3.h>
-#include <cstring>
-#include <sstream>
-char* HexChrom=new char[razm*2];
-void Population::HexToDec(char* HexChrom)
+
+//-------------!!Преобразование Base64-----------------
+#define S_(a) S[n * 3 + a]
+#define S__(a,b) (S[n * 3 + a] & b)
+#define S__l(a,b,c) ((S[n * 3 + a] & b) << c)
+#define B1 buffer[n * 4] = base64ABC[ (S_(0) >> 2) ];
+#define B2 buffer[n * 4 + 1] = base64ABC [ (S__l(0,0x3,4)) | S_(1) >> 4 ];
+#define B3 buffer[n * 4 + 2] = base64ABC [ S__l(1,0x0F,2) | S_(2) >> 6];
+#define B4 buffer[n * 4 + 3] = base64ABC [ S__(2,0x3F) ];
+
+unsigned char * base64_code (unsigned char * S, int SIZE = 0)
 {
-    int a,b;
-    int temp;
-    for(int i=0;i<razm*2;i+=2)
+    uchar_t c, *buffer;
+    int n;
+
+    c = (SIZE == 0) ? strlen ((const char *) S) % 3 : SIZE % 3;
+    SIZE = (SIZE == 0) ? strlen ((const char *) S) / 3 : SIZE / 3;
+
+    buffer = new uchar_t [SIZE * 4 + 5];
+
+    for (n = 0; n <    SIZE; n++)
+    { B1; B2; B3; B4; }
+
+    switch (c)
     {
-    a = HexChrom[i];
-    b = HexChrom[i+1];
-    switch(a)
-        {
-        case '0':
-            {temp=0;
-            break;}
-        case '1':
-            {temp=16;
-            break;}
-        case '2':
-            {temp=32;
-            break;}
-        case '3':
-            {temp=48;
-            break;}
-        case '4':
-            {temp=64;
-            break;}
-        case '5':
-            {temp=80;
-            break;}
-        case '6':
-            {temp=96;
-            break;}
-        case '7':
-            {temp=112;
-            break;}
-        case '8':
-            {temp=128;
-            break;}
-        case '9':
-            {temp=144;
-            break;}
-        case 'A':
-            {temp=160;
-            break;}
-        case 'B':
-            {temp=176;
-            break;}
-        case 'C':
-            {temp=192;
-            break;}
-        case 'D':
-            {temp=208;
-            break;}
-        case 'E':
-            {temp=224;
-            break;}
-        case 'F':
-            {temp=240;
-            break;}
-        }
-    switch(b)
-        {
-        case '1':
-            {temp+=1;
-            break;}
-        case '2':
-            {temp+=2;
-            break;}
-        case '3':
-            {temp+=3;
-            break;}
-        case '4':
-            {temp+=4;
-            break;}
-        case '5':
-            {temp+=5;
-            break;}
-        case '6':
-            {temp+=6;
-            break;}
-        case '7':
-            {temp+=7;
-            break;}
-        case '8':
-            {temp+=8;
-            break;}
-        case '9':
-            {temp+=9;
-            break;}
-        case 'A':
-            {temp+=10;
-            break;}
-        case 'B':
-            {temp+=11;
-            break;}
-        case 'C':
-            {temp+=12;
-            break;}
-        case 'D':
-            {temp+=13;
-            break;}
-        case 'E':
-            {temp+=14;
-            break;}
-        case 'F':
-            {temp+=15;
-            break;}
-        }
-        Population::Chrom[i/2]=temp;
+    case 1:
+        B1; B2;
+        buffer[n * 4 + 2] = '=';
+        buffer[n * 4 + 3] = '=';
+        n++;
+        break;
+    case 2:
+        B1; B2; B3;
+        buffer[n * 4 + 3] = '=';
+        n++;
+        break;
     }
+    buffer[n * 4] = 0;
+    printf ("%s---\n", buffer);
+    return buffer;
 }
+
+#define BASE64(a) ((unsigned char) (strchr (base64ABC, S[n * 4 + a]) - base64ABC))
+unsigned char *
+base64_decode (unsigned char * S, int SIZE = 0)
+{
+    unsigned char * ptr;
+    int n;
+
+    if (SIZE % 4)
+        return NULL;
+
+    SIZE = SIZE ? SIZE / 4 : strlen ((const char *) S) / 4;
+    ptr = new unsigned char [SIZE * 4 + 5];
+
+    for (n = 0; n < SIZE; n++)
+    {
+        ptr[n * 3] = (BASE64(0) << 2) | ( BASE64(1) >> 4);
+        if (S[n * 4 +2] != '=')
+        {
+            ptr[n * 3 + 1] = ((BASE64(1) & 0x0F) << 4) | (BASE64(2) >> 2);
+            if (S[n * 4 + 3] != '=')
+                ptr[n * 3 + 2] = ((BASE64(2) & 0x03) << 6) | BASE64 (3);
+            else
+                ptr[n * 3 + 2] = 0;
+        }
+        else
+            ptr[n * 3 +1] = 0;
+    }
+
+    n++;
+    ptr [n * 3] = 0;
+    return ptr;
+}
+//-------------!!Преобразование Base64-----------------
+
 static int callback(void* HexChrom, int argc, char **argv, char **azColName)
     {
     memcpy(HexChrom, argv[0], razm*2);
     return 0;
         }
-void Population::ChromGen()
+
+ptrbyte Population::ChromGen()
 {
-for (int i=0;i<razm;i++)
-{
-	Chrom[i]=std::rand()%256;
+    ptrbyte buffer = new byte[razm];
+    for (int i=0;i<razm;i++)
+        buffer[i]=std::rand()%256;
+    return buffer;
 }
-}
-char Population::DecToHex(byte a)
-    {
-    switch(a)
-    {
-    case 0:
-        return '0';
-    case 1:
-        return '1';
-    case 2:
-        return '2';
-    case 3:
-        return '3';
-    case 4:
-        return '4';
-    case 5:
-        return '5';
-    case 6:
-        return '6';
-    case 7:
-        return '7';
-    case 8:
-        return '8';
-    case 9:
-        return '9';
-    case 10:
-        return 'A';
-    case 11:
-        return 'B';
-    case 12:
-        return 'C';
-    case 13:
-        return 'D';
-    case 14:
-        return 'E';
-    case 15:
-        return 'F';
-    }
-    return '0';
-    }
-void Population::ChromWrite(int id)
+
+void Population::ChromWrite(int id, ptrbyte Chrom)
 {
 	std::stringstream ss;
 	const char* sql;
 	const char* FFchrom;
-	for (int i=0;i<razm;i++)
-	{
-		ss << DecToHex(Chrom[i]/16)<< DecToHex(Chrom[i]%16);
-	}
+    ss << base64_code(Chrom, razm);
+
 	std::string tmp = ss.str();
 	FFchrom=tmp.c_str();
 	ss.str(std::string());
@@ -194,8 +114,8 @@ void Population::PopGen(int i)
 	int id = 100;
 	while(i>0)
 	{
-		ChromGen();
-		ChromWrite(id);
+        ptrbyte buffer = ChromGen();
+        ChromWrite(id,buffer);
 		id++;
 		i--;
 	}
@@ -205,8 +125,7 @@ Population::Population(int PopSize,const char* PlayerNick)
 	Population::PopSize=PopSize;
 	std::stringstream ss;
 	ss << PlayerNick << ".db";
-	const std::string tmp = ss.str();
-	PlayerDB=tmp.c_str();
+    PlayerDB = ss.str().c_str();
 	if( sqlite3_open(PlayerDB, &db) )
 		{std::cout<< "Ошибка открытия/создания БД: "<< sqlite3_errmsg(db)<<'\n';}
 	else if (sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS population (id INTEGER PRIMARY KEY, chrom CHAR, fitness INTEGER);",0,0,&err))
@@ -220,8 +139,7 @@ void Population::WriteFitness(int id,int fitness)
 {
 	std::stringstream ss;
 	ss <<"UPDATE population SET fitness='"<< fitness<<"' WHERE id='"<<id<<"';";
-	const std::string tmp = ss.str();
-	const char* sql=tmp.c_str();
+    const char* sql=  ss.str().c_str();
 	if (sqlite3_exec(db,sql,0,0,&err))
 	{
 	std::cout<<"Ошибка SQL: "<< err<<'\n';
@@ -233,16 +151,18 @@ byte* Population::GetChrom(int id)
 {
 	std::stringstream ss;
 	ss <<"SELECT chrom FROM population WHERE id='"<< id <<"';";
-	std::string tmp = ss.str();
-	const char* sql=tmp.c_str();
-    if (sqlite3_exec(db,sql,callback,HexChrom,&err))
+    const char* sql= ss.str().c_str();
+    ptrbyte Chrom = new byte[razm*2];
+
+    if (sqlite3_exec(db,sql,callback,Chrom,&err))
 	{
 	std::cout<<"Ошибка SQL: "<< err<<'\n';
 	sqlite3_free(err);
 	}
 	ss.str(std::string());
-    HexToDec(HexChrom);
-	return(Chrom);
+
+    return (base64_decode(Chrom,razm));
+
 }
 Population::~Population()
 {

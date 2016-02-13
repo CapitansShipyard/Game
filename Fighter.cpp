@@ -1108,7 +1108,3 @@ Action Fighter::GetAction(Arena a)
 
 	return (Act);
 }
-void Fighter::SetConstTable(word* ptrCT)
-{
-    vpu.SetIXArray(ptrCT);
-}
