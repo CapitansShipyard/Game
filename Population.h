@@ -7,8 +7,6 @@ const int razm=5;
 class Population {
 private:
 	int PopSize;
-	const char* PlayerDB;
-	char* err=0;
 	sqlite3 *db;
     ptrbyte ChromGen();
     void ChromWrite(int id, ptrbyte Chrom);

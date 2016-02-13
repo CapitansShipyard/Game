@@ -37,7 +37,7 @@ unsigned char * base64_code (unsigned char * S, int SIZE = 0)
         break;
     }
     buffer[n * 4] = 0;
-    printf ("%s---\n", buffer);
+  //  printf ("%s---\n", buffer);
     return buffer;
 }
 
@@ -91,7 +91,8 @@ ptrbyte Population::ChromGen()
 
 void Population::ChromWrite(int id, ptrbyte Chrom)
 {
-	std::stringstream ss;
+    char* err=0;
+    std::stringstream ss;
 	const char* sql;
 	const char* FFchrom;
     ss << base64_code(Chrom, razm);
@@ -122,12 +123,15 @@ void Population::PopGen(int i)
 }
 Population::Population(int PopSize,const char* PlayerNick)
 {
+    char* err=0;
 	Population::PopSize=PopSize;
 	std::stringstream ss;
 	ss << PlayerNick << ".db";
-    PlayerDB = ss.str().c_str();
-	if( sqlite3_open(PlayerDB, &db) )
-		{std::cout<< "Ошибка открытия/создания БД: "<< sqlite3_errmsg(db)<<'\n';}
+    string FileName = ss.str();
+    const char* pFileName = FileName.c_str();
+
+    if( sqlite3_open(pFileName, &db) )
+        {std::cout<< "DB Error open/create: "<< sqlite3_errmsg(db)<<'\n';}
 	else if (sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS population (id INTEGER PRIMARY KEY, chrom CHAR, fitness INTEGER);",0,0,&err))
 		{
 			std::cout<<"Ошибка SQL: "<< err<<'\n';
@@ -137,10 +141,13 @@ Population::Population(int PopSize,const char* PlayerNick)
 }
 void Population::WriteFitness(int id,int fitness)
 {
+    char* err=0;
 	std::stringstream ss;
 	ss <<"UPDATE population SET fitness='"<< fitness<<"' WHERE id='"<<id<<"';";
-    const char* sql=  ss.str().c_str();
-	if (sqlite3_exec(db,sql,0,0,&err))
+    string Query = ss.str();
+    const char* pQuery= Query.c_str();
+
+    if (sqlite3_exec(db,pQuery,0,0,&err))
 	{
 	std::cout<<"Ошибка SQL: "<< err<<'\n';
 	sqlite3_free(err);
@@ -149,12 +156,14 @@ void Population::WriteFitness(int id,int fitness)
 
 byte* Population::GetChrom(int id)
 {
-	std::stringstream ss;
+    char* err=0;
+    std::stringstream ss;
 	ss <<"SELECT chrom FROM population WHERE id='"<< id <<"';";
-    const char* sql= ss.str().c_str();
+    string Query = ss.str();
+    const char* pQuery= Query.c_str();
     ptrbyte Chrom = new byte[razm*2];
 
-    if (sqlite3_exec(db,sql,callback,Chrom,&err))
+    if (sqlite3_exec(db,pQuery,callback,Chrom,&err))
 	{
 	std::cout<<"Ошибка SQL: "<< err<<'\n';
 	sqlite3_free(err);
