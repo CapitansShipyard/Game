@@ -62,6 +62,8 @@ void MyTimer::timerEvent(QTimerEvent *)
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
         m1->SetConstTable(IXArray1);
 
+        float score1 =0;
+
         Action act1 = m1->GetAction(ar);
       //  Action act2 = m2->GetAction(ar);
 
@@ -76,6 +78,7 @@ void MyTimer::timerEvent(QTimerEvent *)
             if (c1.Angle>=360)
                 c1.Angle-=360;
             m1->SetCoord(c1);
+            score1+=0.0002;
         }
         else if (act1.ActionCode==_ACTION_MOVE)
         {
@@ -97,10 +100,15 @@ void MyTimer::timerEvent(QTimerEvent *)
             if (c1.Y>(ar.GetArenaSizeY()-1))
                 c1.Y=ar.GetArenaSizeY()-1;
             m1->SetCoord(c1);
+            score1+=0.0002;
         }
         else if (act1.ActionCode==_ACTION_HALT)
         {//do nothing
         }
+
+        ar.SetScoreOne(ar.GetScoreOne()+score1);
+        ////ОЧКИ ЗА АКТИВНОСТЬ НА АРЕНЕ
+
 
   /*      if (act2.ActionCode==_ACTION_TURN)
         {
@@ -180,7 +188,7 @@ void MyTimer::timerEvent(QTimerEvent *)
 
         //посчитаем очки
         float distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
-        float score1 = 1/distance;
+        score1 = 1/distance;
         float score2 = score1; //пока так
         ar.SetScoreOne(ar.GetScoreOne()+score1);
         ar.SetScoreTwo(ar.GetScoreTwo()+score2);
@@ -334,12 +342,11 @@ int main(int argc, char **argv)
 //    p->Generate();
 //    p->Load();
 //    p->Save();
-
       p->Load();
 
 //    p->Save();
     Population* pNew = p->Evolve();
- //   pNew->Save();
+//   pNew->Save();
     pNew->CopyTo(p);
     delete pNew;
 //    p->Load();
