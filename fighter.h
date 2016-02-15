@@ -71,7 +71,7 @@ private:
     Action Act;
     Coord MyCoord;
     VPU vpu;
-    byte* dna;
+    byte dna[_DNASIZE];
 public:
     Fighter();
     Coord GetCoord()
@@ -81,8 +81,8 @@ public:
     Action GetAction(Arena a);    
     void SetConstTable(word* ptrCT)
     {vpu.SetIXArray(ptrCT);}
-    void SetDNA(byte* arr)
-    {dna = arr;}
+    void SetDNA(ptrbyte pDNA)
+    {memcpy(dna, pDNA, _DNASIZE);}
     void ResetVPU()
     {vpu.Reset();}
 };

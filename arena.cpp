@@ -13,15 +13,17 @@ const int _WINDOW_SIZE_Y=500;
 const int _ACTION_INTERVAL = 3; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
 
-extern Database* pDB;
+Database* pDB;
 int TimerID;
 static Population* p = new Population(1);
 static unsigned int counter;
 
 ptrword IXArray1;
 ptrword IXArray2;
-ptrbyte chrom1;
-ptrbyte chrom2;
+Fighter* m1 = new Fighter;
+Fighter* m2 = new Fighter;
+
+
 
 int sign(int n)
 {    
@@ -211,6 +213,7 @@ void Arena::Initialization(MyTimer* Timer)
         p->Save();
         return;
     }
+
     srand(time(0));
     Coord CoordsM1;
     CoordsM1.X = 10;
@@ -232,11 +235,9 @@ void Arena::Initialization(MyTimer* Timer)
 
     ptrbyte pDNA = p->members[counter]->GetDNA();
 
-    memcpy(chrom1,pDNA,_DNASIZE);
+    m1->SetDNA(pDNA);
 
     cout<<counter<<endl;
-
-    m1->SetDNA(chrom1);
 
     IXArray1 = new word [31];
     IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
@@ -256,7 +257,7 @@ void Arena::Initialization(MyTimer* Timer)
     m2->SetCoord(CoordsM2);
     m2->ResetVPU();
 
-    m2->SetDNA(chrom2);
+    m2->SetDNA(pDNA);
 
     IXArray2 = new word [31];
     IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
@@ -326,7 +327,7 @@ int main(int argc, char **argv)
     scene->addWidget(Score2Label);
 
     view.show();
-
+    ///THIS BLOCK IS FOR TEST PURPOSES ONLY!!!!
 //    p->Generate();
 //    p->Load();
 //    p->Save();
@@ -338,14 +339,9 @@ int main(int argc, char **argv)
 //    pNew->Save();
 //    delete pNew;
 //    p->Load();
+    /////END OF BLOCK
 
     counter = 0;
-
-    Fighter* m1 = new Fighter;
-    Fighter* m2 = new Fighter;
-
-    chrom1 = new byte[_DNASIZE];
-    chrom2 = new byte[_DNASIZE];
 
     ar.SetMemberOne(m1);
     ar.SetMemberTwo(m2);
