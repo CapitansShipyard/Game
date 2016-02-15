@@ -5,12 +5,15 @@ HEADERS += \
     sqlite3.h \
     base64.h \
     database.h \
-    population.h
+    population.h \
+    service.h
 
 SOURCES += \
-    Fighter.cpp \
     arena.cpp \
     sqlite3.c \
     base64.cpp \
     database.cpp \
-    population.cpp
+    population.cpp \
+    fighter.cpp \
+    service.cpp \
+    common.cpp

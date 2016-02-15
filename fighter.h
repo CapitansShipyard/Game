@@ -27,7 +27,6 @@ private:
     bool CFlag();
     bool PFlag();
     word GetIXValue(byte index);
-    word GetWord(byte a, byte b);
     void IncPC(int step);
     char DecToHex(byte a);
     word* IXArray;
@@ -37,8 +36,7 @@ public:
     void SetPC(word arg);
     void SetIX(word arg);
     string GetHex(byte p);
-    int Execute(byte b1, byte b2, byte b3);
-    string GetMnemonic(byte b1, byte b2, byte b3);
+    int Execute(byte b1, byte b2, byte b3);    
     word GetAR()
     {return ar;}
     word GetIXArrayValue(byte index)

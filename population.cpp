@@ -3,12 +3,6 @@
 
 extern Database* pDB;
 
-int myrandom(int n)
-{
-    int j = (int) (((double) n) * rand() / (RAND_MAX + 1.0));
-    return j;
-}
-
 void GenDNA(ptrbyte pBuffer) //заполняет ДНК случайными числами
 {
     ptrbyte buf = new byte[_DNASIZE];

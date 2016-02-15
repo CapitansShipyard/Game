@@ -49,5 +49,7 @@ const byte _ACTION_TURN = 1;
 const byte _ACTION_HALT = 2;
 
 //EXPERIMENTAL!!!!
+word GetWord(byte a, byte b);
+int myrandom(int n);
 
 #endif // COMMON_H
