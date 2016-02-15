@@ -4,12 +4,14 @@ HEADERS += \
     arena.h \
     sqlite3.h \
     base64.h \
-    database.h
+    database.h \
+    population.h
 
 SOURCES += \
     Fighter.cpp \
     arena.cpp \
     sqlite3.c \
-    PopDB.cpp \
     base64.cpp \
-    database.cpp
+    database.cpp \
+    population.cpp \
+    main.cpp

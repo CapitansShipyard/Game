@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+class Population;
+
 class Database
 {
 private:
@@ -18,8 +20,8 @@ public:
     bool AddDNA(int PlayerID, int OrdNumber, ptrbyte pDNA);
     int GetFitness(int PlayerID, int OrdNumber);
     bool GetDNA(int PlayerID, int OrdNumber, ptrbyte Buffer);
-    bool Execute(char* pSQL);
-    bool GetPopulation(int PlayerID, ptrbyte Buffer);
+    bool Execute(const char* pSQL);
+    bool GetPopulation(int PlayerID, Population *Pop);
 };
 
 #endif // DATABASE_H

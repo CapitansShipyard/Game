@@ -1,9 +1,30 @@
 #include "database.h"
 #include "base64.h"
+#include "population.h"
+#include <typeinfo>
+
+static int counter;
 
 static int callback(void* pParam, int argc, char **argv, char **azColName)
 {
-    memcpy(pParam, argv[0], strlen(argv[0])+1); //проверить, нужен ли флаг
+    string pName = typeid(pParam).name();
+    if (pName.find("Popul")!=0)
+    {
+        ptrbyte buf = new byte[_DNASIZE*2];
+        ptrbyte tBuffer = base64_decode(buf, _DNASIZE*2);
+        memcpy(buf, tBuffer, _DNASIZE);
+        delete(tBuffer);
+
+        Population* tPop = static_cast<Population*>(pParam);
+        tPop->members[counter]->SetFitness(atoi(argv[1]));
+        tPop->members[counter]->SetDNA(buf);
+
+        delete(buf);
+        counter++;
+    }
+    else
+        memcpy(pParam, argv[0], strlen(argv[0])+1); //проверить, нужен ли флаг
+
     return 0;
 }
 
@@ -186,7 +207,7 @@ bool Database::GetDNA(int PlayerID, int OrdNumber, ptrbyte Buffer)
     return true;
 }
 
-bool Database::Execute(char *pSQL)
+bool Database::Execute(const char *pSQL)
 {
     char* err=0;
 
@@ -199,8 +220,23 @@ bool Database::Execute(char *pSQL)
     return true;
 }
 
-bool Database::GetPopulation(int PlayerID, ptrbyte Buffer)
+bool Database::GetPopulation(int PlayerID, Population* Pop)
 {
     //написать процедуру
+    char* err=0;
+    std::stringstream ss;
+    ss <<"SELECT dna,fitness FROM t"<<PlayerID<<" ORDER BY fitness DESC;";
+    string Query = ss.str();
+    const char* pQuery= Query.c_str();
+
+    counter = 0;
+
+    if (sqlite3_exec(db,pQuery,callback,Pop,&err))
+    {
+        std::cout<<"SQL Error: "<< err<<endl;
+        sqlite3_free(err);
+        return false;
+    }
+
     return true;
 }
