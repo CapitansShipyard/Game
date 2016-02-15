@@ -1,7 +1,6 @@
 #include "database.h"
 #include "base64.h"
 #include "population.h"
-#include <typeinfo>
 
 static int counter;
 
@@ -10,8 +9,9 @@ static int callback(void* pParam, int argc, char **argv, char **azColName)
     string pName = typeid(pParam).name();
     if (pName.find("Popul")!=0)
     {
+        ptrbyte pargv = (ptrbyte)argv[0];
         ptrbyte buf = new byte[_DNASIZE*2];
-        ptrbyte tBuffer = base64_decode(buf, _DNASIZE*2);
+        ptrbyte tBuffer = base64_decode(pargv, _DNASIZE*2);
         memcpy(buf, tBuffer, _DNASIZE);
         delete(tBuffer);
 

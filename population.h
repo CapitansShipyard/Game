@@ -22,7 +22,7 @@ public:
 class Population
 {
 private:
-    int PlayerID;
+    int playerID;
 public:
     Person* members[_POPULATION_SIZE];
     Population(int pID);
@@ -30,6 +30,8 @@ public:
     void Load();
     void Save();
     void Generate();
+    void Breed(Person* p1, Person* p2, Person *p3, int mutation);
+    Population* Evolve();
 };
 
 #endif // POPULATION_H

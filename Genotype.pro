@@ -13,5 +13,4 @@ SOURCES += \
     sqlite3.c \
     base64.cpp \
     database.cpp \
-    population.cpp \
-    main.cpp
+    population.cpp

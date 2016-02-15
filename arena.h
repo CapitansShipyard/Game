@@ -3,6 +3,20 @@
 
 #include "common.h"
 #include "fighter.h"
+#include <QtGui>
+
+class MyTimer : public QObject {
+protected:
+    QGraphicsScene* ActScene;
+    QGraphicsPolygonItem* tr1;
+    QGraphicsPolygonItem* tr2;
+
+    virtual void timerEvent(QTimerEvent *);
+
+public:
+    MyTimer(QGraphicsScene* PScene, QObject* pobj = 0);
+};
+
 
 struct triangle
 {
@@ -32,7 +46,7 @@ public:
     {}
     ~Arena()
     {}
-    void Initialization();
+    void Initialization(MyTimer *Timer);
     int GetArenaSizeX()
     {return sizeX;}
     int GetArenaSizeY()

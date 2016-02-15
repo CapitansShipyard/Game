@@ -14,6 +14,8 @@ private:
     word de;
     word ix;
     byte f;
+    word randpointer;
+    byte randarray[65536];
     //структура регистра F
     //хххххххх
     //00000PCZ
@@ -45,6 +47,9 @@ public:
     {IXArray = IXArr;}
     int AngleToWall();
     int AngleToEnemy();
+    void SetRandpointer(word pPtr)
+    {randpointer = pPtr;}
+    word GetRND();
 };
 
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
@@ -78,6 +83,8 @@ public:
     {vpu.SetIXArray(ptrCT);}
     void SetDNA(byte* arr)
     {dna = arr;}
+    void ResetVPU()
+    {vpu.Reset();}
 };
 
 #endif // FIGHTER_H

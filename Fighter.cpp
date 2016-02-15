@@ -1,5 +1,13 @@
 #include "arena.h"
 
+word VPU::GetRND()
+{
+    word res = GetWord(randarray[randpointer],0);
+    randpointer++;
+
+    return res;
+}
+
 void VPU::SetFlagC(bool C)
     {
         if (C)
@@ -118,6 +126,10 @@ void VPU::Reset()
         ix = 0;
         pc = 0;
         SetFlags();
+        srand(1);
+        for (int i = 0;i<65536;i++)
+           randarray[i] = rand()%256;
+        randpointer = 0;
     }
 int VPU::GetPC()
     {return pc;}
@@ -720,20 +732,20 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             IncPC(1);
             break;
         case 54:
-            srand(GetWord(b2,b3));
+            SetRandpointer(GetWord(b2,b3));
             IncPC(1);
             break;
         case 55:
-            ar = rand();
+            ar = GetRND();
             SetFlags();
             IncPC(1);
             break;
         case 56:
-            bc= rand();
+            bc= GetRND();
             IncPC(1);
             break;
         case 57:
-            de=rand();
+            de=GetRND();
             IncPC(1);
             break;
         case 58:

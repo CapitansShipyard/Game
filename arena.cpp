@@ -3,14 +3,20 @@
 //параметры бойца: х,у координаты, угол в градусах, 0 - вправо
 //за один такт боец может либо повернуться, либо передвинуться
 
-#include <QtGui>
 #include "arena.h"
+#include "population.h"
+#include "database.h"
 
 const int _MULTIPLIER=4; //множитель размеров арены относительно окна
 const int _WINDOW_SIZE_X=700;
 const int _WINDOW_SIZE_Y=500;
-const int _ACTION_INTERVAL = 5; //интервал опроса бойцов
+const int _ACTION_INTERVAL = 3; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
+
+extern Database* pDB;
+int TimerID;
+static Population* p = new Population(1);
+static unsigned int counter;
 
 ptrword IXArray1;
 ptrword IXArray2;
@@ -28,13 +34,7 @@ QLabel *TickLabel;
 QLabel *Score1Label;
 QLabel *Score2Label;
 
-class MyTimer : public QObject {
-protected:
-    QGraphicsScene* ActScene;
-    QGraphicsPolygonItem* tr1;
-    QGraphicsPolygonItem* tr2;
-
-    virtual void timerEvent(QTimerEvent *)
+void MyTimer::timerEvent(QTimerEvent *)
         {
         double tAngle;
         int mX;
@@ -61,7 +61,7 @@ protected:
         m1->SetConstTable(IXArray1);
 
         Action act1 = m1->GetAction(ar);
-        Action act2 = m2->GetAction(ar);
+      //  Action act2 = m2->GetAction(ar);
 
         if (act1.ActionCode==_ACTION_TURN)
         {
@@ -100,7 +100,7 @@ protected:
         {//do nothing
         }
 
-        if (act2.ActionCode==_ACTION_TURN)
+  /*      if (act2.ActionCode==_ACTION_TURN)
         {
             if (abs(act2.ActionRate)<=ar.GetMaxAngle())
                 c2.Angle+=act2.ActionRate;
@@ -138,7 +138,7 @@ protected:
         else if (act2.ActionCode==_ACTION_HALT)
         {//do nothing
         }
-
+*/
         ActScene->removeItem(tr1);
         ActScene->removeItem(tr2);
         delete tr1;
@@ -183,16 +183,17 @@ protected:
         ar.SetScoreOne(ar.GetScoreOne()+score1);
         ar.SetScoreTwo(ar.GetScoreTwo()+score2);
         Score1Label->setText(QString::number(ar.GetScoreOne(),'f',5));
-        Score2Label->setText(QString::number(ar.GetScoreTwo(),'f',5));
+     //   Score2Label->setText(QString::number(ar.GetScoreTwo(),'f',5));
         ar.IncTickCount();
         TickLabel->setText("Tick: "+QString::number(ar.GetBattleTime()));
         if (ar.GetBattleTime()==1000)
-            ar.Initialization();        
+        {
+            this->killTimer(TimerID);
+            p->members[counter-1]->SetFitness(trunc(ar.GetScoreOne()*10000));
+            cout<<p->members[counter-1]->GetFitness()<<endl;
+            ar.Initialization(this);
+        }
     }
-
-public:
-    MyTimer(QGraphicsScene* PScene, QObject* pobj = 0);
-};
 
 MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
     :ActScene(PScene), QObject(pobj)
@@ -203,26 +204,37 @@ MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
     tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
 }
 
-void Arena::Initialization()
+void Arena::Initialization(MyTimer* Timer)
 {
+    if (counter==_POPULATION_SIZE)
+    {
+        p->Save();
+        return;
+    }
     srand(time(0));
     Coord CoordsM1;
     CoordsM1.X = 10;
     CoordsM1.Y = GetArenaSizeY()/2;
     CoordsM1.Angle =0;
 
+
+    //ТЕСТЫ С НЕПОДВИЖНОЙ МИШЕНЬЮ
     Coord CoordsM2;
-    CoordsM2.X = GetArenaSizeX()-10;
-    CoordsM2.Y = GetArenaSizeY()/2;
+    CoordsM2.X = GetArenaSizeX()/2;
+    CoordsM2.Y = GetArenaSizeY()/2-700;
     CoordsM2.Angle = 180;
 
     Fighter* m1 = ar.GetMemberOne();
     Fighter* m2 = ar.GetMemberTwo();
 
     m1->SetCoord(CoordsM1);
+    m1->ResetVPU();
 
-    for (unsigned int i=0;i<_DNASIZE;i++)
-        chrom1[i]= std::rand()%256;
+    ptrbyte pDNA = p->members[counter]->GetDNA();
+
+    memcpy(chrom1,pDNA,_DNASIZE);
+
+    cout<<counter<<endl;
 
     m1->SetDNA(chrom1);
 
@@ -242,9 +254,7 @@ void Arena::Initialization()
     m1->SetConstTable(IXArray1);
 
     m2->SetCoord(CoordsM2);
-
-    for (unsigned int i=0;i<_DNASIZE;i++)
-        chrom2[i]= std::rand()%256;
+    m2->ResetVPU();
 
     m2->SetDNA(chrom2);
 
@@ -268,9 +278,13 @@ void Arena::Initialization()
     SetScoreOne(0);
     SetScoreTwo(0);
 
+    counter++;
+
+    TimerID = Timer->startTimer(_ACTION_INTERVAL);
+
 }
 
-int main_not_used(int argc, char **argv)
+int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,_WINDOW_SIZE_X,_WINDOW_SIZE_Y));
@@ -313,6 +327,20 @@ int main_not_used(int argc, char **argv)
 
     view.show();
 
+//    p->Generate();
+//    p->Load();
+//    p->Save();
+
+    p->Load();
+
+//    p->Save();
+//    Population* pNew = p->Evolve();
+//    pNew->Save();
+//    delete pNew;
+//    p->Load();
+
+    counter = 0;
+
     Fighter* m1 = new Fighter;
     Fighter* m2 = new Fighter;
 
@@ -322,10 +350,9 @@ int main_not_used(int argc, char **argv)
     ar.SetMemberOne(m1);
     ar.SetMemberTwo(m2);
 
-    ar.Initialization();
+    MyTimer* Timer1 = new MyTimer(scene);
 
-    MyTimer Timer1(scene);
-    Timer1.startTimer(_ACTION_INTERVAL);
+    ar.Initialization(Timer1);
 
     return app.exec();
 }
