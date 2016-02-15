@@ -121,3 +121,12 @@ Population* Population::Evolve()
 
     return res;
 }
+
+void Population::CopyTo(Population *pDest)
+{
+    for (unsigned int i= 0;i<_POPULATION_SIZE;i++)
+    {
+        pDest->members[i]->SetFitness(this->members[i]->GetFitness());
+        pDest->members[i]->SetDNA(this->members[i]->GetDNA());
+    }
+}

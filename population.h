@@ -32,6 +32,7 @@ public:
     void Generate();
     void Breed(Person* p1, Person* p2, Person *p3, int mutation);
     Population* Evolve();
+    void CopyTo(Population* pDest);
 };
 
 #endif // POPULATION_H

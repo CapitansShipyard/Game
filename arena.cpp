@@ -13,15 +13,15 @@ const int _WINDOW_SIZE_Y=500;
 const int _ACTION_INTERVAL = 3; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
 
-Database* pDB;
+Database* pDB = new Database;
 int TimerID;
 static Population* p = new Population(1);
 static unsigned int counter;
 
 ptrword IXArray1;
 ptrword IXArray2;
-Fighter* m1 = new Fighter;
-Fighter* m2 = new Fighter;
+static Fighter* m1 = new Fighter;
+static Fighter* m2 = new Fighter;
 
 
 
@@ -328,16 +328,20 @@ int main(int argc, char **argv)
 
     view.show();
     ///THIS BLOCK IS FOR TEST PURPOSES ONLY!!!!
+//    pDB->AddPlayer(1, "Test");
+//
+//    pDB->CreateTable(1);
 //    p->Generate();
 //    p->Load();
 //    p->Save();
 
-    p->Load();
+      p->Load();
 
 //    p->Save();
-//    Population* pNew = p->Evolve();
-//    pNew->Save();
-//    delete pNew;
+    Population* pNew = p->Evolve();
+ //   pNew->Save();
+    pNew->CopyTo(p);
+    delete pNew;
 //    p->Load();
     /////END OF BLOCK
 
