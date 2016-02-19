@@ -123,3 +123,15 @@ void Population::CopyTo(Population *pDest)
         pDest->members[i]->SetDNA(this->members[i]->GetDNA());
     }
 }
+
+void Population::Sort()
+{
+    for (int i=_POPULATION_SIZE-2; i>=0;i--)
+        for (int j = _POPULATION_SIZE-2;j>=i;j--)
+            if (members[j]->GetFitness()<members[j+1]->GetFitness())
+            {
+                Person* temp = members[j];
+                members[j] = members[j+1];
+                members[j+1] = temp;
+            }
+}

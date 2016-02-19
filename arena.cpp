@@ -348,14 +348,17 @@ int main(int argc, char **argv)
 //    pDB->CreateTable(1);
 //      p->Generate();
     p->Load();
+    p->Sort();
+    for (unsigned int i = 0; i<_POPULATION_SIZE; i++)
+        cout<<p->members[i]->GetFitness()<<endl;
 //    p->Save();
     //  p->Load();
 
 //    p->Save();
-    Population* pNew = p->Evolve();
+//    Population* pNew = p->Evolve();
 //    pNew->Save();
-    pNew->CopyTo(p);
-    delete pNew;
+//    pNew->CopyTo(p);
+ //   delete pNew;
 //    p->Load();
     /////END OF BLOCK
 
@@ -366,7 +369,7 @@ int main(int argc, char **argv)
 
     MyTimer* Timer1 = new MyTimer(scene);
 
-    ar.Initialization(Timer1);
+//    ar.Initialization(Timer1);
 
     return app.exec();
 }

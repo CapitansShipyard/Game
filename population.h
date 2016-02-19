@@ -33,6 +33,7 @@ public:
     void Breed(Person* p1, Person* p2, Person *p3, int mutation);
     Population* Evolve();
     void CopyTo(Population* pDest);
+    void Sort(); //сортировка по фитнесс
 };
 
 #endif // POPULATION_H
