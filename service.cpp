@@ -8,215 +8,201 @@ string GetMnemonic(byte b1, byte b2, byte b3)
         switch(b1)
         {
         case 0:
-            return "NOP";
-        case 1:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR:"<<(int)jump;
             ss>>s;
             return s;
-        case 2:
+        case 1:
             ss <<"CP_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 3:
+        case 2:
             return "CP_AR,BC";
-        case 4:
-            return "CP_AR,DE";
-        case 5:
+        case 3:
             ss <<"CP_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 6:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 4:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_Z:"<<(int)jump;
             ss>>s;
             return s;
-        case 7:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 5:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_NZ:"<<(int)jump;
             ss>>s;
             return s;
-        case 8:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 6:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_C:"<<(int)jump;
             ss>>s;
             return s;
-        case 9:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 7:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_NC:"<<(int)jump;
             ss>>s;
             return s;
-        case 10:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 8:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_P:"<<(int)jump;
             ss>>s;
             return s;
-        case 11:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 9:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"JR_NP:"<<(int)jump;
             ss>>s;
             return s;
-        case 12:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 10:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"CJNZ_AR,BC:"<<(int)jump;
             ss>>s;
             return s;
-        case 13:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            ss <<"CJNZ_AR,DE:"<<(int)jump;
-            ss>>s;
-            return s;
-        case 14:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 11:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"CJZ_AR,BC:"<<(int)jump;
             ss>>s;
             return s;
-        case 15:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            ss <<"CJZ_AR,DE:"<<(int)jump;
-            ss>>s;
-            return s;
-        case 16:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 12:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"CJNC_AR,BC:"<<(int)jump;
             ss>>s;
             return s;
-        case 17:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            ss <<"CJNC_AR,DE:"<<(int)jump;
-            ss>>s;
-            return s;
-        case 18:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 13:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"CJC_AR,BC:"<<(int)jump;
             ss>>s;
             return s;
-        case 19:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            ss <<"CJC_AR,DE:"<<(int)jump;
-            ss>>s;
-            return s;
-        case 20:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 14:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             ss <<"DJNZ:"<<(int)jump;
             ss>>s;
             return s;
-        case 21:
+        case 15:
             ss <<"LD_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 22:
+        case 16:
             ss <<"LD_BC,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 23:
-            ss <<"LD_DE,"<<GetWord(b2,b3);
-            ss>>s;
-            return s;
-        case 24:
+        case 17:
             ss <<"LD_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 25:
+        case 18:
             ss <<"ADD_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 26:
+        case 19:
             return "ADD_AR,BC";
-        case 27:
-            return "ADD_AR,DE";
-        case 28:
+        case 20:
             ss <<"ADD_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 29:
+        case 21:
             ss <<"DEC_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 30:
+        case 22:
             return "DEC_AR,BC";
-        case 31:
-            return "DEC_AR,DE";
-        case 32:
+        case 23:
             ss <<"DEC_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 33:
+        case 24:
             ss <<"MUL_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 34:
+        case 25:
             return "MUL_AR,BC";
-        case 35:
-            return "MUL_AR,DE";
-        case 36:
+        case 26:
             ss <<"MUL_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 37:
+        case 27:
             ss <<"DIV_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 38:
+        case 28:
             return "DIV_AR,BC";
-        case 39:
-            return "DIV_AR,DE";
-        case 40:
+        case 29:
             ss <<"DIV_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 41:
+        case 30:
             ss <<"RST_AR,"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 42:
+        case 31:
             return "RST_AR,BC";
-        case 43:
-            return "RST_AR,DE";
-        case 44:
+        case 32:
             ss <<"RST_AR,(IX+"<<GetWord(b2,0)<<")";
             ss>>s;
             return s;
-        case 45:
+        case 33:
             return "INC_AR";
-        case 46:
+        case 34:
             return "INC_BC";
-        case 47:
-            return "INC_DE";
-        case 48:
+        case 35:
             return "DEC_AR";
-        case 49:
+        case 36:
             return "DEC_BC";
-        case 50:
-            return "DEC_DE";
-        case 51:
+        case 37:
             return "EX_AR,BC";
-        case 52:
-            return "EX_AR,DE";
-        case 53:
-            return "EX_BC,DE";
-        case 54:
+        case 38:
             ss <<"SEED:"<<GetWord(b2,b3);
             ss>>s;
             return s;
-        case 55:
+        case 39:
             return "LD_AR,RND";
-        case 56:
+        case 40:
             return "LD_BC,RND";
-        case 57:
-            return "LD_DE,RND";
-        case 58:
+        case 41:
             return "LD_AR,ANGLE_TO_WALL";
-        case 59:
+        case 42:
             return "LD_AR,ANGLE_TO_ENEMY";
-        case 60:
-            return "RET_MOVE";
-        case 61:
+        case 43:
+            return "RET_MOVE_FORWARD";
+        case 44:
             return "RET_TURN";
-        case 62:
+        case 45:
             return "RET_HALT";
+        case 46:
+            return "RET_TURN_TO_ENEMY";
+        case 47:
+            return "RET_TURN_FROM_ENEMY";
+        case 48:
+            return "RET_TURN_FROM_WALL";
+        case 49:
+            return "RET_MOVE_BACKWARD";
+        case 50:
+            return "NOP";
+        case 51:
+            return "NOP";
+        case 52:
+            return "NOP";
+        case 53:
+            return "NOP";
+        case 54:
+            return "NOP";
+        case 55:
+            return "NOP";
+        case 56:
+            return "NOP";
+        case 57:
+            return "NOP";
+        case 58:
+            return "NOP";
+        case 59:
+            return "NOP";
+        case 60:
+            return "NOP";
+        case 61:
+            return "NOP";
+        case 62:
+            return "NOP";
         case 63:
-            return "RET_SOMETHING";
+            return "NOP";
 
         default:
             return "NOP";

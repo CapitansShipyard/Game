@@ -58,13 +58,12 @@ Population::~Population()
 
 void Population::Breed(Person *p1, Person *p2, Person *p3, int mutation)
 {
-    //первый партнер имеет более высокий приоритет над вторым.
     //скрещивание происходит блоками по три байта
     //приоритет надо подобрать
     ptrbyte ptr1 = p1->GetDNA();
     ptrbyte ptr2 = p2->GetDNA();
     ptrbyte ptrres = new byte[_DNASIZE];
-    const int priority = 60; //приоритет
+    const int priority = 50; //приоритет
 
     for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
     {

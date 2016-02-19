@@ -1,4 +1,5 @@
 #include "arena.h"
+#include "service.h"
 
 word VPU::GetRND()
 {
@@ -36,6 +37,7 @@ void VPU::SetFlags()
             SetFlagZ(1);
         else
             SetFlagZ(0);
+        SetFlagP(1);
         //добавить установку флага P
 
     }
@@ -118,14 +120,15 @@ void VPU::Reset()
     {
         ar = 0;
         bc = 0;
-        de = 0;
         ix = 0;
         pc = 0;
+        f = 0;
         SetFlags();
         srand(1);
         for (int i = 0;i<65536;i++)
            randarray[i] = rand()%256;
         randpointer = 0;
+        DNAUsage = 0;
     }
 int VPU::GetPC()
     {return pc;}
@@ -154,13 +157,10 @@ int VPU::Execute(byte b1, byte b2, byte b3)
         switch(b1)
         {
         case 0:
-            IncPC(1);
-            break;
-        case 1:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             IncPC(jump);
             break;
-        case 2:
+        case 1:
             temp = (GetWord(b2,b3)-ar);
             if (temp==0)
             {
@@ -179,7 +179,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             }
             IncPC(1);
             break;
-        case 3:
+        case 2:
             temp = (bc-ar);
             if (temp==0)
             {
@@ -198,26 +198,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             }
             IncPC(1);
             break;
-        case 4:
-            temp = (de-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            IncPC(1);
-            break;
-        case 5:
+        case 3:
             temp = GetIXValue(b2);
             temp-=ar;
             if (temp==0)
@@ -237,17 +218,35 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             }
             IncPC(1);
             break;
-        case 6:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 4:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             if (ZFlag())
             {
                 IncPC(jump);
             }
             else
                 IncPC(1);
-        case 7:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 5:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             if (!ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+            break;
+        case 6:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
+            if (CFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+            break;
+        case 7:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
+            if (!CFlag())
             {
                 IncPC(jump);
             }
@@ -255,25 +254,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 IncPC(1);
             break;
         case 8:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            if (CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 9:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            if (!CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 10:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             if (PFlag())
             {
                 IncPC(jump);
@@ -281,8 +262,8 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             else
                 IncPC(1);
             break;
-        case 11:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 9:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             if (!PFlag())
             {
                 IncPC(jump);
@@ -290,8 +271,8 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             else
                 IncPC(1);
             break;
-        case 12:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+        case 10:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
             temp = (bc-ar);
             if (temp==0)
             {
@@ -309,6 +290,56 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 SetFlagC(1);
             }
             if (!ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+            break;
+        case 11:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (ZFlag())
+            {
+                IncPC(jump);
+            }
+            else
+                IncPC(1);
+            break;
+        case 12:
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
+            temp = (bc-ar);
+            if (temp==0)
+            {
+                SetFlagZ(1);
+                SetFlagC(0);
+            }
+            else if (temp>0)
+            {
+                SetFlagZ(0);
+                SetFlagC(0);
+            }
+            else
+            {
+                SetFlagZ(0);
+                SetFlagC(1);
+            }
+            if (!CFlag())
             {
                 IncPC(jump);
             }
@@ -316,8 +347,8 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 IncPC(1);
             break;
         case 13:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (de-ar);
+            jump = (b2<128)?b2:((b2-128)&191)*(-1);
+            temp = (bc-ar);
             if (temp==0)
             {
                 SetFlagZ(1);
@@ -333,166 +364,15 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 SetFlagZ(0);
                 SetFlagC(1);
             }
-            if (!ZFlag())
+            if (CFlag())
             {
                 IncPC(jump);
             }
             else
                 IncPC(1);
             break;
-
         case 14:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (bc-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (ZFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 15:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (de-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (ZFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 16:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (bc-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (!CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 17:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (de-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (!CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 18:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (bc-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 19:
-            jump = (b2<128)?b2:(b2-128)*(-1);
-            temp = (de-ar);
-            if (temp==0)
-            {
-                SetFlagZ(1);
-                SetFlagC(0);
-            }
-            else if (temp>0)
-            {
-                SetFlagZ(0);
-                SetFlagC(0);
-            }
-            else
-            {
-                SetFlagZ(0);
-                SetFlagC(1);
-            }
-            if (CFlag())
-            {
-                IncPC(jump);
-            }
-            else
-                IncPC(1);
-            break;
-        case 20:
-            jump = (b2<128)?b2:(b2-128)*(-1);
+            jump = (b2<128)?(b2&&63):((b2-128)&191)*(-1);
             if (jump>0)
                 jump*=-1;
             bc--;
@@ -503,25 +383,21 @@ int VPU::Execute(byte b1, byte b2, byte b3)
             else
                 IncPC(1);
             break;
-        case 21:
+        case 15:
             ar = GetWord(b2,b3);
             SetFlags();
             IncPC(1);
             break;
-        case 22:
+        case 16:
             bc= GetWord(b2,b3);
             IncPC(1);
             break;
-        case 23:
-            de= GetWord(b2,b3);
-            IncPC(1);
-            break;
-        case 24:
+        case 17:
             ar = GetIXValue(b2);
             SetFlags();
             IncPC(1);
             break;
-        case 25:
+        case 18:
             temp =GetWord(b2,b3);
             ar+=temp;
             SetFlags();
@@ -530,7 +406,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 26:
+        case 19:
             ar+=bc;
             SetFlags();
             test = ar+bc;
@@ -538,15 +414,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 27:
-            ar+=de;
-            SetFlags();
-            test = ar+bc;
-            if ((test>32767)||(test<-32767))
-                 SetFlagC(true);
-            IncPC(1);
-            break;
-        case 28:
+        case 20:
             temp =GetIXValue(b2);
             ar+=temp;
             SetFlags();
@@ -555,7 +423,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 29:
+        case 21:
             temp = GetWord(b2,b3);
             ar-=temp;
             SetFlags();
@@ -564,7 +432,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 30:
+        case 22:
             ar-=bc;
             SetFlags();
             test = ar-bc;
@@ -572,15 +440,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 31:
-            ar-=de;
-            SetFlags();
-            test = ar-de;
-            if ((test>32767)||(test<-32767))
-                 SetFlagC(true);
-            IncPC(1);
-            break;
-        case 32:
+        case 23:
             temp = GetIXValue(b2);
             ar-=temp;
             SetFlags();
@@ -589,7 +449,7 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 33:
+        case 24:
             temp =GetWord(b2,b3);
             ar*=temp;
             SetFlags();
@@ -598,23 +458,15 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 34:
+        case 25:
             ar*=bc;
             SetFlags();
-            test = ar*de;
+            test = ar*bc;
             if ((test>32767)||(test<-32767))
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 35:
-            ar*=de;
-            SetFlags();
-            test = ar*de;
-            if ((test>32767)||(test<-32767))
-                 SetFlagC(true);
-            IncPC(1);
-            break;
-        case 36:
+        case 26:
             temp =GetIXValue(b2);
             ar*=temp;
             SetFlags();
@@ -623,58 +475,46 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                  SetFlagC(true);
             IncPC(1);
             break;
-        case 37:
+        case 27:
             temp = GetWord(b2,b3);
             ar/=temp;
             SetFlags();
             IncPC(1);
             break;
-        case 38:
+        case 28:
             if (bc!=0)
                 ar/=bc;
             SetFlags();
             IncPC(1);
             break;
-        case 39:
-            if (de!=0)
-                ar/=de;
-            SetFlags();
-            IncPC(1);
-            break;
-        case 40:
+        case 29:
             temp = GetIXValue(b2);
             if (temp!=0)
                 ar/=temp;
             SetFlags();
             IncPC(1);
             break;
-        case 41:
+        case 30:
             temp= GetWord(b2,b3);
             if (temp!=0)
                 ar=ar%temp;
             SetFlags();
             IncPC(1);
             break;
-        case 42:
+        case 31:
             if (bc!=0)
                 ar=ar%bc;
             SetFlags();
             IncPC(1);
             break;
-        case 43:
-            if (de!=0)
-                ar=ar%de;
-            SetFlags();
-            IncPC(1);
-            break;
-        case 44:
+        case 32:
             temp = GetIXValue(b2);
             if (temp!=0)
                 ar=ar%temp;
             SetFlags();
             IncPC(1);
             break;
-        case 45:
+        case 33:
             test = ar;
             ar++;
             SetFlags();
@@ -682,15 +522,11 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 SetFlagC(1);
             IncPC(1);
             break;
-        case 46:
+        case 34:
             bc++;
             IncPC(1);
             break;
-        case 47:
-            de++;
-            IncPC(1);
-            break;
-        case 48:
+        case 35:
             test = ar;
             ar--;
             SetFlags();
@@ -698,78 +534,101 @@ int VPU::Execute(byte b1, byte b2, byte b3)
                 SetFlagC(1);
             IncPC(1);
             break;
-        case 49:
+        case 36:
             bc--;
             IncPC(1);
             break;
-        case 50:
-            de--;
-            IncPC(1);
-            break;
-        case 51:
+        case 37:
             temp = ar;
             ar = bc;
             bc = temp;
             SetFlags();
             IncPC(1);
             break;
-        case 52:
-            temp = ar;
-            ar = de;
-            de = temp;
-            SetFlags();
-            IncPC(1);
-            break;
-        case 53:
-            temp = bc;
-            de = bc;
-            bc = temp;
-            SetFlags();
-            IncPC(1);
-            break;
-        case 54:
+        case 38:
             SetRandpointer(GetWord(b2,b3));
             IncPC(1);
             break;
-        case 55:
+        case 39:
             ar = GetRND();
             SetFlags();
             IncPC(1);
             break;
-        case 56:
+        case 40:
             bc= GetRND();
             IncPC(1);
             break;
+        case 41:
+            ar = AngleToWall();
+            IncPC(1);
+            break;
+        case 42:
+            ar = AngleToEnemy();
+            IncPC(1);
+            break;
+        case 43:
+            IncPC(1);
+            return(1);
+        case 44:
+            IncPC(1);
+            return(2);
+        case 45:
+            IncPC(1);
+            return(3);
+        case 46:
+            IncPC(1);
+            return(4);//turn to enemy
+        case 47:
+            IncPC(1);
+            return(5);//turn from enemy
+        case 48:
+            IncPC(1);
+            return(6);//turn from wall
+        case 49:
+            IncPC(1);
+            return(7);//move backward
+        case 50:
+            IncPC(1);
+            break;
+        case 51:
+            IncPC(1);
+            break;
+        case 52:
+            IncPC(1);
+            break;
+        case 53:
+            IncPC(1);
+            break;
+        case 54:
+            IncPC(1);
+            break;
+        case 55:
+            IncPC(1);
+            break;
+        case 56:
+            IncPC(1);
+            break;
         case 57:
-            de=GetRND();
             IncPC(1);
             break;
         case 58:
-            ar = AngleToWall();
-//            cout<< "LD_AR,ANGLE_TO_WALL"<<endl;
             IncPC(1);
             break;
         case 59:
-            ar = AngleToEnemy();
-//            cout<< "LD_AR,ANGLE_TO_ENEMY"<<endl;
             IncPC(1);
             break;
         case 60:
-//            cout<<"RET_MOVE"<<endl;
             IncPC(1);
-            return(1);
+            break;
         case 61:
-  //          cout<<"RET_TURN"<<endl;
             IncPC(1);
-            return(2);
+            break;
         case 62:
-//            cout<< "RET_HALT"<<endl;
             IncPC(1);
-            return(3);
+            break;
         case 63:
-//            cout<< "RET_SOMETHING"<<endl;
             IncPC(1);
-            return(1);//временно
+            break;
         default:
             IncPC(1);
         }
@@ -860,17 +719,24 @@ Action Fighter::GetAction(Arena a)
     unsigned int step = 0;
     int RetCode;
     bool stop=false;
+    int temp;
 
     Act.ActionCode = _ACTION_HALT;
     Act.ActionRate = 0;
 
+  /*  if (a.GetBattleTime() == 0)
+    {
+            cout<<"ar="<<vpu.GetAR()<<", bc="<<vpu.bc<<" f="<<vpu.f<<", pc="<<vpu.GetPC()<<endl;
+    }*/
     while ((step<_VPU_MAX_STEPS)&&(!stop))//настроить
     {
         i = vpu.GetPC();
+        if (vpu.DNAUsage<i)
+            vpu.DNAUsage = i;
         step++;
 
-       // cout<<(i/3)<<'\t'<<vpu.GetHex(arr[i]%64)<<setw(4)<<vpu.GetHex(arr[i+1])<<setw(4)
-        //   <<vpu.GetHex(arr[i+2])<<'\t'<<vpu.GetMnemonic(arr[i]%64,arr[i+1],arr[i+2])<<endl;
+//        cout<<(i/3)<<'\t'<<vpu.GetHex(dna[i]%64)<<setw(4)<<vpu.GetHex(dna[i+1])<<setw(4)
+//           <<vpu.GetHex(dna[i+2])<<'\t'<<GetMnemonic(dna[i]%64,dna[i+1],dna[i+2])<<'\t'<<vpu.GetAR()<<endl;
         RetCode = vpu.Execute(dna[i]%64,dna[i+1],dna[i+2]);
         switch(RetCode)
         {
@@ -888,6 +754,40 @@ Action Fighter::GetAction(Arena a)
             Act.ActionCode = _ACTION_HALT;
             Act.ActionRate = 0;
             stop = true;
+            break;
+        case 4:
+            Act.ActionCode = _ACTION_TURN;
+            temp = MyCoord.Angle-vpu.AngleToEnemy();
+            if (temp>180)
+                temp = (360-temp)*(-1);
+            Act.ActionRate = temp;
+            stop = true;
+            break;
+        case 5:
+            Act.ActionCode = _ACTION_TURN;
+            temp = MyCoord.Angle-vpu.AngleToWall();
+            temp+=180;
+            if (temp>360)
+                temp-=360;
+            if (temp>180)
+                temp = (360-temp)*(-1);
+            Act.ActionRate = temp;
+            stop = true;
+            break;
+        case 6:
+            Act.ActionCode = _ACTION_TURN;
+            temp = MyCoord.Angle-vpu.AngleToWall();
+            if (temp>180)
+                temp = (360-temp)*(-1);
+            Act.ActionRate = temp;
+            stop = true;
+            break;
+        case 7:
+            Act.ActionCode = _ACTION_MOVE;
+            Act.ActionRate = (vpu.GetAR()&63)*(-1);
+            stop = true;
+            break;
+
         }
     }
 

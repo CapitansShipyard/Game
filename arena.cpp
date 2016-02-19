@@ -18,8 +18,6 @@ int TimerID;
 static Population* p = new Population(1);
 static unsigned int counter;
 
-ptrword IXArray1;
-ptrword IXArray2;
 static Fighter* m1 = new Fighter;
 static Fighter* m2 = new Fighter;
 
@@ -30,7 +28,7 @@ int sign(int n)
  return (n<=32767)-(n>=32767);
 }
 
-Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,15);
+Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,20);
 
 QLabel *TickLabel;
 QLabel *Score1Label;
@@ -48,6 +46,7 @@ void MyTimer::timerEvent(QTimerEvent *)
         Coord c1 = m1->GetCoord();
         Coord c2 = m2->GetCoord();
 
+        ptrword IXArray1 = new word[32];
         IXArray1[_IX_MY_COORD_X] = c1.X;
         IXArray1[_IX_MY_COORD_Y] = c1.Y;
         IXArray1[_IX_ENEMY_COORD_X] = c2.X;
@@ -55,6 +54,7 @@ void MyTimer::timerEvent(QTimerEvent *)
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
         m1->SetConstTable(IXArray1);
 
+        ptrword IXArray2 = new word[32];
         IXArray2[_IX_MY_COORD_X] = c2.X;
         IXArray2[_IX_MY_COORD_Y] = c2.Y;
         IXArray2[_IX_ENEMY_COORD_X] = c1.X;
@@ -62,7 +62,10 @@ void MyTimer::timerEvent(QTimerEvent *)
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
         m1->SetConstTable(IXArray1);
 
-        float score1 =0;
+        delete(IXArray1);
+        delete(IXArray2);
+
+        double score1 =0;
 
         Action act1 = m1->GetAction(ar);
       //  Action act2 = m2->GetAction(ar);
@@ -81,11 +84,11 @@ void MyTimer::timerEvent(QTimerEvent *)
             score1+=0.0002;
         }
         else if (act1.ActionCode==_ACTION_MOVE)
-        {
-            if (act1.ActionRate<=ar.GetMaxMove())
+        {            
+            if (abs(act1.ActionRate)<=ar.GetMaxMove())
                 movement = act1.ActionRate;
             else
-                movement = ar.GetMaxMove();
+                movement = ar.GetMaxMove()*sign(act1.ActionRate);
             tAngle = c1.Angle*_180_DIV_PI;
             mX = floor(cos(tAngle)*movement);
             mY = floor(sin(tAngle)*movement);
@@ -125,10 +128,10 @@ void MyTimer::timerEvent(QTimerEvent *)
         }
         else if (act2.ActionCode==_ACTION_MOVE)
         {
-            if (act2.ActionRate<=ar.GetMaxMove())
+            if (abs(act2.ActionRate)<=ar.GetMaxMove())
                 movement = act2.ActionRate;
             else
-                movement = ar.GetMaxMove();
+                movement = ar.GetMaxMove()*sign(act2.ActionRate);
 
             tAngle= c2.Angle*_180_DIV_PI;
             mX = trunc(cos(tAngle)*movement);
@@ -187,9 +190,9 @@ void MyTimer::timerEvent(QTimerEvent *)
         ar.SetMemberTwo(m2);
 
         //посчитаем очки
-        float distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
+        double distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
         score1 = 1/distance;
-        float score2 = score1; //пока так
+        double score2 = score1; //пока так
         ar.SetScoreOne(ar.GetScoreOne()+score1);
         ar.SetScoreTwo(ar.GetScoreTwo()+score2);
         Score1Label->setText(QString::number(ar.GetScoreOne(),'f',5));
@@ -200,7 +203,8 @@ void MyTimer::timerEvent(QTimerEvent *)
         {
             this->killTimer(TimerID);
             p->members[counter-1]->SetFitness(trunc(ar.GetScoreOne()*10000));
-            cout<<p->members[counter-1]->GetFitness()<<endl;
+            cout<<"Fitness = "<<p->members[counter-1]->GetFitness()<<endl;
+            cout<<"DNA usage(%) = "<<(int)((m1->GetDNAUsage()*100)/_DNASIZE)<<endl;
             ar.Initialization(this);
         }
     }
@@ -222,7 +226,6 @@ void Arena::Initialization(MyTimer* Timer)
         return;
     }
 
-    srand(time(0));
     Coord CoordsM1;
     CoordsM1.X = 10;
     CoordsM1.Y = GetArenaSizeY()/2;
@@ -247,7 +250,7 @@ void Arena::Initialization(MyTimer* Timer)
 
     cout<<counter<<endl;
 
-    IXArray1 = new word [31];
+    ptrword IXArray1 = new word [32];
     IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
     IXArray1[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
     IXArray1[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
@@ -267,7 +270,7 @@ void Arena::Initialization(MyTimer* Timer)
 
     m2->SetDNA(pDNA);
 
-    IXArray2 = new word [31];
+    ptrword IXArray2 = new word [32];
     IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
     IXArray2[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
     IXArray2[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
@@ -287,6 +290,8 @@ void Arena::Initialization(MyTimer* Timer)
     SetScoreOne(0);
     SetScoreTwo(0);
 
+    delete(IXArray1);
+    delete(IXArray2);
     counter++;
 
     TimerID = Timer->startTimer(_ACTION_INTERVAL);
@@ -335,18 +340,20 @@ int main(int argc, char **argv)
     scene->addWidget(Score2Label);
 
     view.show();
+
+ //   srand(time(0));
     ///THIS BLOCK IS FOR TEST PURPOSES ONLY!!!!
 //    pDB->AddPlayer(1, "Test");
 //
 //    pDB->CreateTable(1);
-//    p->Generate();
-//    p->Load();
+//      p->Generate();
+    p->Load();
 //    p->Save();
-      p->Load();
+    //  p->Load();
 
 //    p->Save();
     Population* pNew = p->Evolve();
-//   pNew->Save();
+//    pNew->Save();
     pNew->CopyTo(p);
     delete pNew;
 //    p->Load();

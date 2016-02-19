@@ -11,7 +11,6 @@ private:
     word ar;
     unsigned int pc;
     word bc;
-    word de;
     word ix;
     byte f;
     word randpointer;
@@ -29,7 +28,7 @@ private:
     word GetIXValue(byte index);
     void IncPC(int step);
     char DecToHex(byte a);
-    word* IXArray;
+    word IXArray[32];
 public:    
     void Reset();
     int GetPC();
@@ -42,12 +41,14 @@ public:
     word GetIXArrayValue(byte index)
     {return IXArray[index];}
     void SetIXArray(word* IXArr)
-    {IXArray = IXArr;}
+    {memcpy(IXArray, IXArr,32);}
     int AngleToWall();
     int AngleToEnemy();
     void SetRandpointer(word pPtr)
     {randpointer = pPtr;}
     word GetRND();
+
+    unsigned int DNAUsage;//debugging
 };
 
 struct Action//структура действий, для оператора return (не дает возвращать несколько значений)
@@ -83,6 +84,8 @@ public:
     {memcpy(dna, pDNA, _DNASIZE);}
     void ResetVPU()
     {vpu.Reset();}
+    unsigned int GetDNAUsage()
+    {return vpu.DNAUsage;}
 };
 
 #endif // FIGHTER_H
