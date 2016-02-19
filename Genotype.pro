@@ -17,3 +17,5 @@ SOURCES += \
     fighter.cpp \
     service.cpp \
     common.cpp
+
+LIBS += -L/lib64 -l:libdl.so.2
