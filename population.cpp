@@ -58,121 +58,167 @@ Population::~Population()
 
 
 
-void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutation)
+void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutation, int selectorCross)
 {
     //скрещивание происходит блоками по три байта
     ptrbyte ptr1 = p1->GetDNA();
     ptrbyte ptr2 = p2->GetDNA();
     ptrbyte ptrres1 = new byte[_DNASIZE];
     ptrbyte ptrres2 = new byte[_DNASIZE];
-    //эта часть относится к случайному кроссоверу
-//************************************************************
-    for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+    switch (selectorCross)
     {
-        if ((rand()%100)<50)
+    case 5:
+    {
+        if(rand()%2 == 0)
         {
-            ptrres1[i]   = ptr1[i];
-            ptrres1[i+1] = ptr1[i+1];
-            ptrres1[i+2] = ptr1[i+2];
-            ptrres2[i]   = ptr2[i];
-            ptrres2[i+1] = ptr2[i+1];
-            ptrres2[i+2] = ptr2[i+2];
-        }
-        else
+            selectorCross = 1;
+        } else
         {
-            ptrres1[i]   = ptr2[i];
-            ptrres1[i+1] = ptr2[i+1];
-            ptrres1[i+2] = ptr2[i+2];
-            ptrres2[i]   = ptr1[i];
-            ptrres2[i+1] = ptr1[i+1];
-            ptrres2[i+2] = ptr1[i+2];
-        }
-        if ((rand()%100)<mutation)
-        {
-            ptrres1[i]   = rand()%256;
-            ptrres1[i+1] = rand()%256;
-            ptrres1[i+2] = rand()%256;
-            ptrres2[i]   = rand()%256;
-            ptrres2[i+1] = rand()%256;
-            ptrres2[i+2] = rand()%256;
+            selectorCross = 4;
         }
     }
-//************************************************************
-    //эта часть к одноточечному кроссоверу. Закомментировал, чтоб не поломать логику работы.
-//************************************************************
-  /*unsigned int splitpoint=(rand()%(_DNASIZE/3-1)+1)*3; //перестраховался на случай если ДНК будет больше 32768
-    for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+    case 6:
     {
-        if (splitpoint<i)
+        if(rand()%2 == 0)
         {
-            ptrres1[i]   = ptr1[i];
-            ptrres1[i+1] = ptr1[i+1];
-            ptrres1[i+2] = ptr1[i+2];
-            ptrres2[i]   = ptr2[i];
-            ptrres2[i+1] = ptr2[i+1];
-            ptrres2[i+2] = ptr2[i+2];
-        }
-        else
+            selectorCross = 2;
+        } else
         {
-            ptrres1[i]   = ptr2[i];
-            ptrres1[i+1] = ptr2[i+1];
-            ptrres1[i+2] = ptr2[i+2];
-            ptrres2[i]   = ptr1[i];
-            ptrres2[i+1] = ptr1[i+1];
-            ptrres2[i+2] = ptr1[i+2];
+            selectorCross = 4;
         }
-        if ((rand()%100)<mutation)
-        {
-            ptrres1[i]   = rand()%256;
-            ptrres1[i+1] = rand()%256;
-            ptrres1[i+2] = rand()%256;
-            ptrres2[i]   = rand()%256;
-            ptrres2[i+1] = rand()%256;
-            ptrres2[i+2] = rand()%256;
-        }
-    }*/
-//************************************************************
-    //эта часть к двухточечному кроссоверу. Закомментировал, чтоб не поломать логику работы.
-//************************************************************
-  /*unsigned int splitpoint1=(rand()%(_DNASIZE/3-1)+1)*3;
-    unsigned int splitpoint2=(rand()%(_DNASIZE/3-1)+1)*3;
-    if (splitpoint1>splitpoint2)
-    {
-        unsigned int temp = splitpoint2;
-        splitpoint2 = splitpoint1;
-        splitpoint1 = temp;
     }
-    for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+    case 7:
     {
-        if(i<splitpoint1 || i>splitpoint2)
+        int flag = rand()%3;
+        switch (flag)
         {
-            ptrres1[i]   = ptr1[i];
-            ptrres1[i+1] = ptr1[i+1];
-            ptrres1[i+2] = ptr1[i+2];
-            ptrres2[i]   = ptr2[i];
-            ptrres2[i+1] = ptr2[i+1];
-            ptrres2[i+2] = ptr2[i+2];
-        }
-        else
+        case 0:
         {
-            ptrres1[i]   = ptr2[i];
-            ptrres1[i+1] = ptr2[i+1];
-            ptrres1[i+2] = ptr2[i+2];
-            ptrres2[i]   = ptr1[i];
-            ptrres2[i+1] = ptr1[i+1];
-            ptrres2[i+2] = ptr1[i+2];
+            selectorCross = 1;
+            break;
         }
-        if ((rand()%100)<mutation)
+        case 1:
         {
-            ptrres1[i]   = rand()%256;
-            ptrres1[i+1] = rand()%256;
-            ptrres1[i+2] = rand()%256;
-            ptrres2[i]   = rand()%256;
-            ptrres2[i+1] = rand()%256;
-            ptrres2[i+2] = rand()%256;
+            selectorCross = 2;
+            break;
         }
-    }*/
-//************************************************************
+        case 4:
+        {
+            selectorCross = 4;
+            break;
+        }
+        }
+    }
+    case 1:
+        {
+        unsigned int splitpoint=(rand()%(_DNASIZE/3-1)+1)*3; //перестраховался на случай если ДНК будет больше 32768
+            for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+            {
+                if (splitpoint<i)
+                {
+                    ptrres1[i]   = ptr1[i];
+                    ptrres1[i+1] = ptr1[i+1];
+                    ptrres1[i+2] = ptr1[i+2];
+                    ptrres2[i]   = ptr2[i];
+                    ptrres2[i+1] = ptr2[i+1];
+                    ptrres2[i+2] = ptr2[i+2];
+                }
+                else
+                {
+                    ptrres1[i]   = ptr2[i];
+                    ptrres1[i+1] = ptr2[i+1];
+                    ptrres1[i+2] = ptr2[i+2];
+                    ptrres2[i]   = ptr1[i];
+                    ptrres2[i+1] = ptr1[i+1];
+                    ptrres2[i+2] = ptr1[i+2];
+                }
+                if ((rand()%100)<mutation)
+                {
+                    ptrres1[i]   = rand()%256;
+                    ptrres1[i+1] = rand()%256;
+                    ptrres1[i+2] = rand()%256;
+                    ptrres2[i]   = rand()%256;
+                    ptrres2[i+1] = rand()%256;
+                    ptrres2[i+2] = rand()%256;
+                }
+                break;
+            }
+        }
+    case 2:
+        {
+        unsigned int splitpoint1=(rand()%(_DNASIZE/3-1)+1)*3;
+            unsigned int splitpoint2=(rand()%(_DNASIZE/3-1)+1)*3;
+            if (splitpoint1>splitpoint2)
+            {
+                unsigned int temp = splitpoint2;
+                splitpoint2 = splitpoint1;
+                splitpoint1 = temp;
+            }
+            for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+            {
+                if(i<splitpoint1 || i>splitpoint2)
+                {
+                    ptrres1[i]   = ptr1[i];
+                    ptrres1[i+1] = ptr1[i+1];
+                    ptrres1[i+2] = ptr1[i+2];
+                    ptrres2[i]   = ptr2[i];
+                    ptrres2[i+1] = ptr2[i+1];
+                    ptrres2[i+2] = ptr2[i+2];
+                }
+                else
+                {
+                    ptrres1[i]   = ptr2[i];
+                    ptrres1[i+1] = ptr2[i+1];
+                    ptrres1[i+2] = ptr2[i+2];
+                    ptrres2[i]   = ptr1[i];
+                    ptrres2[i+1] = ptr1[i+1];
+                    ptrres2[i+2] = ptr1[i+2];
+                }
+                if ((rand()%100)<mutation)
+                {
+                    ptrres1[i]   = rand()%256;
+                    ptrres1[i+1] = rand()%256;
+                    ptrres1[i+2] = rand()%256;
+                    ptrres2[i]   = rand()%256;
+                    ptrres2[i+1] = rand()%256;
+                    ptrres2[i+2] = rand()%256;
+                }
+            }
+        }
+    case 4:
+    {
+        for (unsigned int i=0;i<(_DNASIZE-1);i+=3)
+        {
+            if ((rand()%100)<50)
+            {
+                ptrres1[i]   = ptr1[i];
+                ptrres1[i+1] = ptr1[i+1];
+                ptrres1[i+2] = ptr1[i+2];
+                ptrres2[i]   = ptr2[i];
+                ptrres2[i+1] = ptr2[i+1];
+                ptrres2[i+2] = ptr2[i+2];
+            }
+            else
+            {
+                ptrres1[i]   = ptr2[i];
+                ptrres1[i+1] = ptr2[i+1];
+                ptrres1[i+2] = ptr2[i+2];
+                ptrres2[i]   = ptr1[i];
+                ptrres2[i+1] = ptr1[i+1];
+                ptrres2[i+2] = ptr1[i+2];
+            }
+            if ((rand()%100)<mutation)
+            {
+                ptrres1[i]   = rand()%256;
+                ptrres1[i+1] = rand()%256;
+                ptrres1[i+2] = rand()%256;
+                ptrres2[i]   = rand()%256;
+                ptrres2[i+1] = rand()%256;
+                ptrres2[i+2] = rand()%256;
+            }
+        }
+    }
+    }
     p3->SetDNA(ptrres1);
     p4->SetDNA(ptrres2);
 
@@ -194,7 +240,7 @@ Population* Population::Evolve()
 
     for (unsigned int i =1;i<_POPULATION_SIZE;i++)
     {
-        Breed(members[0],members[i],newperson1, newperson2, 10);
+        Breed(members[0],members[i],newperson1, newperson2, 10, 7);
         res->members[i]->SetDNA(newperson1->GetDNA());
         res->members[i]->SetFitness(0);
     }
