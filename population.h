@@ -30,7 +30,7 @@ public:
     void Load();
     void Save();
     void Generate();
-    void Breed(Person* p1, Person* p2, Person *p3, Person *p4, int mutation);
+    void Breed(Person* p1, Person* p2, Person *p3, Person *p4, int mutation, int selectorCross);
     Population* Evolve();
     void CopyTo(Population* pDest);
     void Sort(); //сортировка по фитнесс
