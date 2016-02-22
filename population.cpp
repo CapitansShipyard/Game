@@ -102,7 +102,7 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
             selectorCross = 2;
             break;
         }
-        case 4:
+        case 2:
         {
             selectorCross = 4;
             break;
@@ -146,7 +146,7 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
         }
     case 2:
         {
-        unsigned int splitpoint1=(rand()%(_DNASIZE/3-1)+1)*3;
+            unsigned int splitpoint1=(rand()%(_DNASIZE/3-1)+1)*3;
             unsigned int splitpoint2=(rand()%(_DNASIZE/3-1)+1)*3;
             if (splitpoint1>splitpoint2)
             {
@@ -184,6 +184,7 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
                     ptrres2[i+2] = rand()%256;
                 }
             }
+            break;
         }
     case 4:
     {
@@ -217,6 +218,7 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
                 ptrres2[i+2] = rand()%256;
             }
         }
+        break;
     }
     }
     p3->SetDNA(ptrres1);
