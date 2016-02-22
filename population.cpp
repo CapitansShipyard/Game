@@ -58,7 +58,7 @@ Population::~Population()
 
 
 
-void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutation, int selectorCross)
+void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutation, int mutateStrength, int selectorCross)
 {
     //скрещивание происходит блоками по три байта
     ptrbyte ptr1 = p1->GetDNA();
@@ -228,23 +228,45 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
     delete ptrres2;
 }
 
-Population* Population::Evolve()
+Population* Population::Evolve(int eliteCount, int luckersCount)
 {
     Population* res = new Population(playerID);
 
     srand(time(0));
 
-    res->members[0]->SetDNA(this->members[0]->GetDNA());
-    res->members[0]->SetFitness(0);
+    for (int i=0; i<eliteCount; i++)
+    {
+    res->members[i]->SetDNA(this->members[i]->GetDNA());
+    res->members[i]->SetFitness(0);
+    }
 
     Person* newperson1 = new Person;
     Person* newperson2 = new Person;
+    int first_parent_index = 0;
+    float flag, flagcount = 1/3;
 
-    for (unsigned int i =1;i<_POPULATION_SIZE;i++)
+    for (unsigned int i = eliteCount;i<_POPULATION_SIZE;i+=2)
     {
-        Breed(members[0],members[i],newperson1, newperson2, 10, 7);
+
+        flag = (rand()%10000)/10000;
+        flagcount = 1/3;
+        for (first_parent_index = 0; flagcount<flag; first_parent_index++)
+        {
+            flagcount+=1/3*(first_parent_index+2);
+            if(first_parent_index==_POPULATION_SIZE)
+            {
+                first_parent_index = 0;
+                break;
+            }
+        }
+        Breed(members[first_parent_index],members[rand()%_POPULATION_SIZE],newperson1, newperson2, 10, 0, 7);
         res->members[i]->SetDNA(newperson1->GetDNA());
         res->members[i]->SetFitness(0);
+        if (i+1<_POPULATION_SIZE)
+        {
+            res->members[i+1]->SetDNA(newperson2->GetDNA());
+            res->members[i+1]->SetFitness(0);
+        }
     }
 
     delete newperson1;

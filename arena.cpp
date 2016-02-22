@@ -355,7 +355,7 @@ int main(int argc, char **argv)
     //  p->Load();
 
 //    p->Save();
-//    Population* pNew = p->Evolve();
+//    Population* pNew = p->Evolve(1,0);
 //    pNew->Save();
 //    pNew->CopyTo(p);
  //   delete pNew;
