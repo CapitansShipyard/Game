@@ -225,7 +225,7 @@ bool Database::GetPopulation(int PlayerID, Population* Pop)
     //написать процедуру
     char* err=0;
     std::stringstream ss;
-    ss <<"SELECT dna,fitness FROM t"<<PlayerID<<";"; //" ORDER BY fitness DESC;";
+    ss <<"SELECT dna,fitness FROM t"<<PlayerID<<" ORDER BY fitness DESC;";
     string Query = ss.str();
     const char* pQuery= Query.c_str();
 
