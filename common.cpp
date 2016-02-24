@@ -11,6 +11,14 @@ int myrandom(int n)
     return j;
 }
 
+int sign(int n)
+{
+    if (n>=0)
+        return 1;
+    else
+        return -1;
+}
+
 char DecToHex(byte a)
     {
     switch(a)

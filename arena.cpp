@@ -24,21 +24,27 @@ static Fighter* m2 = new Fighter;
 
 static Arena* ar = new Arena;
 
-
-int sign(int n)
-{    
-    if (n>=0)
-        return 1;
-    else
-        return -1;
-}
-
-
 QLabel *TickLabel;
 QLabel *Score1Label;
 QLabel *Score2Label;
 
-
+void FillIXArray(Fighter* f1, Fighter* f2, Arena* a) //заполняет массив констант участника f1
+{
+    int* IXArray = new int [32];
+    IXArray[_IX_ARENA_SIZE_X] = a->GetArenaSizeX();
+    IXArray[_IX_ARENA_SIZE_Y] = a->GetArenaSizeY();
+    IXArray[_IX_ARENA_MAX_ANGLE] = a->GetMaxAngle();
+    IXArray[_IX_ARENA_MAX_MOVE] = a->GetMaxMove();
+    IXArray[_IX_MY_COORD_X] = f1->GetCoord().X;
+    IXArray[_IX_MY_COORD_Y] = f1->GetCoord().Y;
+    IXArray[_IX_ENEMY_COORD_X] = f2->GetCoord().X;
+    IXArray[_IX_ENEMY_COORD_Y] = f2->GetCoord().Y;
+    IXArray[_IX_ARENA_TICK_COUNT] = a->GetBattleTime();
+    for (int i = 9;i<32;i++)
+      IXArray[i] = 0;
+    f1->SetConstTable(IXArray);
+    delete IXArray;
+}
 
 void MyTimer::timerEvent(QTimerEvent *)
         {
@@ -47,42 +53,13 @@ void MyTimer::timerEvent(QTimerEvent *)
         int mY;
         int movement;
 
-        Fighter* m1 = ar->GetMemberOne();
-        Fighter* m2 = ar->GetMemberTwo();
+        m1 = ar->GetMemberOne();
+        m2 = ar->GetMemberTwo();
         Coord c1 = m1->GetCoord();
         Coord c2 = m2->GetCoord();
 
-        int* IXArray1 = new int [32];
-        IXArray1[_IX_ARENA_SIZE_X] = ar->GetArenaSizeX();
-        IXArray1[_IX_ARENA_SIZE_Y] = ar->GetArenaSizeY();
-        IXArray1[_IX_ARENA_MAX_ANGLE] = ar->GetMaxAngle();
-        IXArray1[_IX_ARENA_MAX_MOVE] = ar->GetMaxMove();
-        IXArray1[_IX_MY_COORD_X] = c1.X;
-        IXArray1[_IX_MY_COORD_Y] = c1.Y;
-        IXArray1[_IX_ENEMY_COORD_X] = c2.X;
-        IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
-        IXArray1[_IX_ARENA_TICK_COUNT] = ar->GetBattleTime();
-        for (int i = 9;i<32;i++)
-          IXArray1[i] = 0;
-        m1->SetConstTable(IXArray1);
-
-        int* IXArray2 = new int [32];
-        IXArray2[_IX_ARENA_SIZE_X] = ar->GetArenaSizeX();
-        IXArray2[_IX_ARENA_SIZE_Y] = ar->GetArenaSizeY();
-        IXArray2[_IX_ARENA_MAX_ANGLE] = ar->GetMaxAngle();
-        IXArray2[_IX_ARENA_MAX_MOVE] = ar->GetMaxMove();
-        IXArray2[_IX_MY_COORD_X] = c2.X;
-        IXArray2[_IX_MY_COORD_Y] = c2.Y;
-        IXArray2[_IX_ENEMY_COORD_X] = c1.X;
-        IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
-        IXArray2[_IX_ARENA_TICK_COUNT] = ar->GetBattleTime();
-        for (int i = 9;i<32;i++)
-          IXArray2[i] = 0;
-
-        m2->SetConstTable(IXArray2);
-
-        delete(IXArray1);
-        delete(IXArray2);
+        FillIXArray(m1,m2,ar);
+        FillIXArray(m2,m1,ar);
 
         double score1 =0;
 
@@ -189,7 +166,7 @@ void MyTimer::timerEvent(QTimerEvent *)
 
         ar->IncTickCount();
         TickLabel->setText("Tick: "+QString::number(ar->GetBattleTime()));
-        if (ar->GetBattleTime()==1000)
+        if (ar->GetBattleTime()==_BATTLE_TIME)
         {
             this->killTimer(TimerID);
             p->members[counter-1]->SetFitness(trunc(ar->GetScoreOne()*10000));
@@ -264,42 +241,13 @@ void Arena::Simulate()
 
     do
     {
-        Fighter* m1 = GetMemberOne();
-        Fighter* m2 = GetMemberTwo();
+        m1 = GetMemberOne();
+        m2 = GetMemberTwo();
         Coord c1 = m1->GetCoord();
         Coord c2 = m2->GetCoord();
 
-        int* IXArray1 = new int [32];
-        IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
-        IXArray1[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
-        IXArray1[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
-        IXArray1[_IX_ARENA_MAX_MOVE] = GetMaxMove();
-        IXArray1[_IX_MY_COORD_X] = c1.X;
-        IXArray1[_IX_MY_COORD_Y] = c1.Y;
-        IXArray1[_IX_ENEMY_COORD_X] = c2.X;
-        IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
-        IXArray1[_IX_ARENA_TICK_COUNT] = GetBattleTime();
-        for (int i = 9;i<32;i++)
-          IXArray1[i] = 0;
-        m1->SetConstTable(IXArray1);
-
-        int* IXArray2 = new int [32];
-        IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
-        IXArray2[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
-        IXArray2[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
-        IXArray2[_IX_ARENA_MAX_MOVE] = GetMaxMove();
-        IXArray2[_IX_MY_COORD_X] = c2.X;
-        IXArray2[_IX_MY_COORD_Y] = c2.Y;
-        IXArray2[_IX_ENEMY_COORD_X] = c1.X;
-        IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
-        IXArray2[_IX_ARENA_TICK_COUNT] = GetBattleTime();
-        for (int i = 9;i<32;i++)
-          IXArray2[i] = 0;
-
-        m2->SetConstTable(IXArray2);
-
-        delete(IXArray1);
-        delete(IXArray2);
+        FillIXArray(m1,m2,this);
+        FillIXArray(m2,m1,this);
 
         double score1 =0;
 
@@ -423,65 +371,34 @@ void Arena::Initialization(MyTimer* Timer)
     CoordsM1.Y = GetArenaSizeY()/2;
     CoordsM1.Angle =0;
 
-
     //ТЕСТЫ С НЕПОДВИЖНОЙ МИШЕНЬЮ
     Coord CoordsM2;
     CoordsM2.X = GetArenaSizeX()/2;
     CoordsM2.Y = GetArenaSizeY()/2+700;
     CoordsM2.Angle = 180;
 
-    Fighter* m1 = ar->GetMemberOne();
-    Fighter* m2 = ar->GetMemberTwo();
+    m1 = ar->GetMemberOne();
+    m2 = ar->GetMemberTwo();
 
+    ptrbyte pDNA = p->members[counter]->GetDNA();
+    m1->SetDNA(pDNA);
     m1->SetCoord(CoordsM1);
     m1->ResetVPU();
 
-    ptrbyte pDNA = p->members[counter]->GetDNA();
+    FillIXArray(m1,m2,this);
 
-    m1->SetDNA(pDNA);
-
-    int* IXArray1 = new int [32];
-    IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
-    IXArray1[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
-    IXArray1[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
-    IXArray1[_IX_ARENA_MAX_MOVE] = GetMaxMove();
-    IXArray1[_IX_ARENA_TICK_COUNT] = 0;
-    IXArray1[_IX_MY_COORD_X] = CoordsM1.X;
-    IXArray1[_IX_MY_COORD_Y] = CoordsM1.Y;
-    IXArray1[_IX_ENEMY_COORD_X] = CoordsM2.X;
-    IXArray1[_IX_ENEMY_COORD_Y] = CoordsM2.Y;
-    for (int i = 9;i<32;i++)
-      IXArray1[i] = 0;
-
-    m1->SetConstTable(IXArray1);
-
+    m2->SetDNA(pDNA);
     m2->SetCoord(CoordsM2);
     m2->ResetVPU();
 
-    m2->SetDNA(pDNA);
+    FillIXArray(m2,m1,this);
 
-    int* IXArray2 = new int [32];
-    IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
-    IXArray2[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
-    IXArray2[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
-    IXArray2[_IX_ARENA_MAX_MOVE] = GetMaxMove();
-    IXArray2[_IX_ARENA_TICK_COUNT] = 0;
-    IXArray2[_IX_MY_COORD_X] = CoordsM2.X;
-    IXArray2[_IX_MY_COORD_Y] = CoordsM2.Y;
-    IXArray2[_IX_ENEMY_COORD_X] = CoordsM1.X;
-    IXArray2[_IX_ENEMY_COORD_Y] = CoordsM1.Y;
-    for (int i = 9;i<32;i++)
-      IXArray2[i] = 0;
-
-    m2->SetConstTable(IXArray2);
     TickCount =0;
     SetMemberOne(m1);
     SetMemberTwo(m2);
     SetScoreOne(0);
     SetScoreTwo(0);
 
-    delete(IXArray1);
-    delete(IXArray2);
     counter++;
 
     if (_FAST_CALC!=1)
@@ -531,32 +448,28 @@ int main(int argc, char **argv)
     view.show();
 
     ar->SetScene(scene);
-
     ar->Prepare();
- //   srand(time(0));
-    ///THIS BLOCK IS FOR TEST PURPOSES ONLY!!!!
-//    pDB->AddPlayer(1, "Test");
-//
-//    pDB->CreateTable(1);
-  //   p->Generate();
-//    p->Load();
- //   cout<<"MAX fitness before = "<<p->members[0]->GetFitness()<<endl;
-    //  p->Load();
-
-//    p->Save();
-//    Population* pNew = p->Evolve(1,0);
- //   pNew->CopyTo(p);
-  //  delete pNew;
-    p->Load();
-    /////END OF BLOCK
-
     MyTimer* Timer1 = new MyTimer;
     counter = 0;
 
     ar->SetMemberOne(m1);
     ar->SetMemberTwo(m2);
 
-    if (_FAST_CALC==1)
+    //------раскомментировать для создания базы (первый запуск)-------
+    //pDB->AddPlayer(1, "Test");
+    //pDB->CreateTable(1);
+    //----------------------------------------------------------------
+
+    //----раскомментировать для генерации новой популяции в памяти----
+    //srand(time(0));
+    //p->Generate();
+    //----------------------------------------------------------------
+
+    //----раскомментировать для загрузки начальной популяции из базы--
+    p->Load();
+    //----------------------------------------------------------------
+
+    if (_FAST_CALC==1) //настраивается выше в разделе объявлений
     {
         for (int j = 1;j<=50;j++)//количество популяций
         {
@@ -567,17 +480,21 @@ int main(int argc, char **argv)
 
             for (unsigned int i=0;i<_POPULATION_SIZE;i++)
             {
-
                 ar->Initialization(Timer1);
                 ar->Simulate();
             }
             p->Sort();
             cout<<"Leader fitness after "<<j<<" = "<<p->members[0]->GetFitness()<<endl;
         }
-        p->Save();
+        p->Save(); //сохраняется только самая последняя популяция
     }
     else
+    {
+        Population* pNew = p->Evolve(1,0);
+        pNew->CopyTo(p);
+        delete pNew;
         ar->Initialization(Timer1);
+    }
 
     return app.exec();
 }

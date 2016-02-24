@@ -28,7 +28,7 @@ typedef unsigned char uchar_t;
 const unsigned int _DNASIZE=12000; //размер ДНК в байтах, кратно 3 и 4(<32768 на данный момент)
 const unsigned int _VPU_MAX_STEPS = 1000; //Защита от зависания VPU
 const unsigned int _POPULATION_SIZE = 20; //размер популяции. На данный момент <=100
-const unsigned int _BATTLE_TIME = 1000; //время боя
+const int _BATTLE_TIME = 1000; //время боя
 const double _PI = 3.14159265358979323846264338327950288419717;
 const double _180_DIV_PI = 0.01745329251994329576923690768489;
 const byte _NICKNAME_MAX_LENGTH = 32; //максимальная длина ника игрока
@@ -52,5 +52,6 @@ const byte _ACTION_HALT = 2;
 //EXPERIMENTAL!!!!
 word GetWord(byte a, byte b);
 int myrandom(int n);
+int sign(int n);
 
 #endif // COMMON_H

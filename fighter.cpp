@@ -666,10 +666,6 @@ Action Fighter::GetAction(Arena *a)
     Act.ActionCode = _ACTION_HALT;
     Act.ActionRate = 0;
 
-  /*  if (a.GetBattleTime() == 0)
-    {
-            cout<<"ar="<<vpu.GetAR()<<", bc="<<vpu.bc<<" f="<<vpu.f<<", pc="<<vpu.GetPC()<<endl;
-    }*/
     while ((step<_VPU_MAX_STEPS)&&(!stop))//настроить
     {
         i = vpu.GetPC();
