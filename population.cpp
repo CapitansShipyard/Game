@@ -67,6 +67,16 @@ void Population::Breed(Person *p1, Person *p2, Person *p3, Person *p4, int mutat
     ptrbyte ptrres2 = new byte[_DNASIZE];
     switch (selectorCross)
     {
+    case 3:
+    {
+        if(rand()%2 == 0)
+        {
+            selectorCross = 1;
+        } else
+        {
+            selectorCross = 2;
+        }
+    }
     case 5:
     {
         if(rand()%2 == 0)
@@ -244,6 +254,7 @@ Population* Population::Evolve(int eliteCount, int luckersCount)
     Person* newperson2 = new Person;
     int first_parent_index = 0;
     float flag, flagcount = 1/3;
+    int parentTwo = 0;
 
     for (unsigned int i = eliteCount;i<_POPULATION_SIZE;i+=2)
     {
@@ -259,6 +270,12 @@ Population* Population::Evolve(int eliteCount, int luckersCount)
                 break;
             }
         }
+
+        do
+        {
+        parentTwo = rand()%_POPULATION_SIZE;
+        }
+        while (parentTwo == first_parent_index);
         Breed(members[first_parent_index],members[rand()%_POPULATION_SIZE],newperson1, newperson2, 10, 0, 7);
         res->members[i]->SetDNA(newperson1->GetDNA());
         res->members[i]->SetFitness(0);
