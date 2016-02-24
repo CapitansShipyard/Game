@@ -11,7 +11,6 @@ private:
     word ar;
     unsigned int pc;
     word bc;
-    word ix;
     byte f;
     word randpointer;
     byte randarray[65536];
@@ -27,14 +26,13 @@ private:
     bool PFlag();
     word GetIXValue(byte index);
     void IncPC(int step);
-    char DecToHex(byte a);
     int IXArray[32];
 public:    
     void Reset();
-    int GetPC();
-    void SetPC(word arg);
-    void SetIX(word arg);
-    string GetHex(byte p);
+    int GetPC()
+    {return pc;}
+    void SetPC(unsigned int arg)
+    {pc = arg;}
     int Execute(byte b1, byte b2, byte b3);    
     word GetAR()
     {return ar;}
@@ -44,7 +42,7 @@ public:
     {memcpy(IXArray, IXArr,sizeof(int)*32);}
     int AngleToWall();
     int AngleToEnemy();
-    void SetRandpointer(word pPtr)
+    void SetRandpointer(unsigned int pPtr)
     {randpointer = pPtr;}
     word GetRND();
 
@@ -77,7 +75,7 @@ public:
     {return(MyCoord);}
     void SetCoord(Coord a)
     {MyCoord=a;}
-    Action GetAction(Arena a);    
+    Action GetAction(Arena* a);
     void SetConstTable(int* ptrCT)
     {vpu.SetIXArray(ptrCT);}
     void SetDNA(ptrbyte pDNA)

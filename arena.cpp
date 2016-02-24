@@ -12,6 +12,7 @@ const int _WINDOW_SIZE_X=700;
 const int _WINDOW_SIZE_Y=500;
 const int _ACTION_INTERVAL = 3; //интервал опроса бойцов
 const int _BORDER = 35; //рамка арены
+static const int _FAST_CALC = 0;//режим быстрого просчета или 0 - с визуализацией
 
 Database* pDB = new Database;
 int TimerID;
@@ -21,6 +22,7 @@ static unsigned int counter;
 static Fighter* m1 = new Fighter;
 static Fighter* m2 = new Fighter;
 
+static Arena* ar = new Arena;
 
 
 int sign(int n)
@@ -31,11 +33,12 @@ int sign(int n)
         return -1;
 }
 
-Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,20);
 
 QLabel *TickLabel;
 QLabel *Score1Label;
 QLabel *Score2Label;
+
+
 
 void MyTimer::timerEvent(QTimerEvent *)
         {
@@ -44,35 +47,35 @@ void MyTimer::timerEvent(QTimerEvent *)
         int mY;
         int movement;
 
-        Fighter* m1 = ar.GetMemberOne();
-        Fighter* m2 = ar.GetMemberTwo();
+        Fighter* m1 = ar->GetMemberOne();
+        Fighter* m2 = ar->GetMemberTwo();
         Coord c1 = m1->GetCoord();
         Coord c2 = m2->GetCoord();
 
         int* IXArray1 = new int [32];
-        IXArray1[_IX_ARENA_SIZE_X] = ar.GetArenaSizeX();
-        IXArray1[_IX_ARENA_SIZE_Y] = ar.GetArenaSizeY();
-        IXArray1[_IX_ARENA_MAX_ANGLE] = ar.GetMaxAngle();
-        IXArray1[_IX_ARENA_MAX_MOVE] = ar.GetMaxMove();
+        IXArray1[_IX_ARENA_SIZE_X] = ar->GetArenaSizeX();
+        IXArray1[_IX_ARENA_SIZE_Y] = ar->GetArenaSizeY();
+        IXArray1[_IX_ARENA_MAX_ANGLE] = ar->GetMaxAngle();
+        IXArray1[_IX_ARENA_MAX_MOVE] = ar->GetMaxMove();
         IXArray1[_IX_MY_COORD_X] = c1.X;
         IXArray1[_IX_MY_COORD_Y] = c1.Y;
         IXArray1[_IX_ENEMY_COORD_X] = c2.X;
         IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
-        IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
+        IXArray1[_IX_ARENA_TICK_COUNT] = ar->GetBattleTime();
         for (int i = 9;i<32;i++)
           IXArray1[i] = 0;
         m1->SetConstTable(IXArray1);
 
         int* IXArray2 = new int [32];
-        IXArray2[_IX_ARENA_SIZE_X] = ar.GetArenaSizeX();
-        IXArray2[_IX_ARENA_SIZE_Y] = ar.GetArenaSizeY();
-        IXArray2[_IX_ARENA_MAX_ANGLE] = ar.GetMaxAngle();
-        IXArray2[_IX_ARENA_MAX_MOVE] = ar.GetMaxMove();
+        IXArray2[_IX_ARENA_SIZE_X] = ar->GetArenaSizeX();
+        IXArray2[_IX_ARENA_SIZE_Y] = ar->GetArenaSizeY();
+        IXArray2[_IX_ARENA_MAX_ANGLE] = ar->GetMaxAngle();
+        IXArray2[_IX_ARENA_MAX_MOVE] = ar->GetMaxMove();
         IXArray2[_IX_MY_COORD_X] = c2.X;
         IXArray2[_IX_MY_COORD_Y] = c2.Y;
         IXArray2[_IX_ENEMY_COORD_X] = c1.X;
         IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
-        IXArray2[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
+        IXArray2[_IX_ARENA_TICK_COUNT] = ar->GetBattleTime();
         for (int i = 9;i<32;i++)
           IXArray2[i] = 0;
 
@@ -88,10 +91,10 @@ void MyTimer::timerEvent(QTimerEvent *)
 
         if (act1.ActionCode==_ACTION_TURN)
         {            
-            if (abs(act1.ActionRate)<=ar.GetMaxAngle())
+            if (abs(act1.ActionRate)<=ar->GetMaxAngle())
                 movement = act1.ActionRate;
             else
-                movement = (ar.GetMaxAngle()*sign(act1.ActionRate));
+                movement = (ar->GetMaxAngle()*sign(act1.ActionRate));
             c1.Angle+=movement;
             if (c1.Angle<0)
                 c1.Angle+=360;
@@ -102,10 +105,10 @@ void MyTimer::timerEvent(QTimerEvent *)
         }
         else if (act1.ActionCode==_ACTION_MOVE)
         {            
-            if (abs(act1.ActionRate)<=ar.GetMaxMove())
+            if (abs(act1.ActionRate)<=ar->GetMaxMove())
                 movement = act1.ActionRate;
             else
-                movement = ar.GetMaxMove()*sign(act1.ActionRate);
+                movement = ar->GetMaxMove()*sign(act1.ActionRate);
             tAngle = c1.Angle*_180_DIV_PI;
             mX = floor(cos(tAngle)*movement);
             mY = floor(sin(tAngle)*movement);
@@ -115,10 +118,10 @@ void MyTimer::timerEvent(QTimerEvent *)
                 c1.X=1;
             if (c1.Y<1)
                 c1.Y=1;
-            if (c1.X>(ar.GetArenaSizeX()-1))
-                c1.X=ar.GetArenaSizeX()-1;
-            if (c1.Y>(ar.GetArenaSizeY()-1))
-                c1.Y=ar.GetArenaSizeY()-1;
+            if (c1.X>(ar->GetArenaSizeX()-1))
+                c1.X=ar->GetArenaSizeX()-1;
+            if (c1.Y>(ar->GetArenaSizeY()-1))
+                c1.Y=ar->GetArenaSizeY()-1;
             m1->SetCoord(c1);
             score1+=0.0002;
         }
@@ -126,7 +129,7 @@ void MyTimer::timerEvent(QTimerEvent *)
         {//do nothing
         }
 
-        ar.SetScoreOne(ar.GetScoreOne()+score1);
+        ar->SetScoreOne(ar->GetScoreOne()+score1);
         ////ОЧКИ ЗА АКТИВНОСТЬ НА АРЕНЕ
 
 
@@ -170,70 +173,241 @@ void MyTimer::timerEvent(QTimerEvent *)
         {//do nothing
         }
 */
-        ActScene->removeItem(tr1);
-        ActScene->removeItem(tr2);
-        delete tr1;
-        delete tr2;
-        QPolygonF pg;
+        ar->SetMemberOne(m1);
+        ar->SetMemberTwo(m2);
 
-        //нужно определить координаты точек равнобедренного треугольника, учитывая угол
-        triangle tr;
-        tAngle = c1.Angle*_180_DIV_PI;
-        tr.x1 = c1.X-20*sin(tAngle);
-        tr.y1 = c1.Y-20*cos(tAngle);
-        tr.x2 = c1.X+70*cos(tAngle);
-        tr.y2 = c1.Y-70*sin(tAngle);
-        tr.x3 = c1.X+20*sin(tAngle);
-        tr.y3 = c1.Y+20*cos(tAngle);
+        ar->ReDraw();
 
-        pg<< QPointF(tr.x1/_MULTIPLIER+_BORDER,tr.y1/_MULTIPLIER+_BORDER)
-          <<QPointF(tr.x2/_MULTIPLIER+_BORDER,tr.y2/_MULTIPLIER+_BORDER)
-          <<QPointF(tr.x3/_MULTIPLIER+_BORDER,tr.y3/_MULTIPLIER+_BORDER);
-        tr1 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
-        pg.remove(0,3);
+        double distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
+        score1 = 1/distance;
+        double score2 = score1; //пока так
 
-        tAngle = c2.Angle*_180_DIV_PI;
-        tr.x1 = c2.X-20*sin(tAngle);
-        tr.y1 = c2.Y-20*cos(tAngle);
-        tr.x2 = c2.X+70*cos(tAngle);
-        tr.y2 = c2.Y-70*sin(tAngle);
-        tr.x3 = c2.X+20*sin(tAngle);
-        tr.y3 = c2.Y+20*cos(tAngle);
+        Score1Label->setText(QString::number(ar->GetScoreOne(),'f',5));
+     //   Score2Label->setText(QString::number(ar.GetScoreTwo(),'f',5));
+        ar->SetScoreOne(ar->GetScoreOne()+score1);
+        ar->SetScoreTwo(ar->GetScoreTwo()+score2);
 
-        pg<< QPointF(tr.x1/_MULTIPLIER+_BORDER,tr.y1/_MULTIPLIER+_BORDER)
-          <<QPointF(tr.x2/_MULTIPLIER+_BORDER,tr.y2/_MULTIPLIER+_BORDER)
-          <<QPointF(tr.x3/_MULTIPLIER+_BORDER,tr.y3/_MULTIPLIER+_BORDER);
-        tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
-        ar.SetMemberOne(m1);
-        ar.SetMemberTwo(m2);
+        ar->IncTickCount();
+        TickLabel->setText("Tick: "+QString::number(ar->GetBattleTime()));
+        if (ar->GetBattleTime()==1000)
+        {
+            this->killTimer(TimerID);
+            p->members[counter-1]->SetFitness(trunc(ar->GetScoreOne()*10000));
+            cout<<"Fitness = "<<p->members[counter-1]->GetFitness()<<endl;
+            cout<<"DNA usage(%) = "<<(int)((m1->GetDNAUsage()*100)/_DNASIZE)<<endl;
+            ar->Initialization(this);
+        }
+    }
+
+void Arena::Prepare()
+{
+    SetArenaSizeX((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER);
+    SetArenaSizeY((_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER);
+    SetMaxAngle(5);
+    SetMaxMove(20);
+    TickCount = 0;
+
+    QPolygonF pg;
+    tr1 = ArScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
+    tr2 = ArScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
+}
+
+void Arena::ReDraw()
+{
+    Coord c1 = GetMemberOne()->GetCoord();
+    Coord c2 = GetMemberTwo()->GetCoord();
+
+    double tAngle;
+    ArScene->removeItem(tr1);
+    ArScene->removeItem(tr2);
+    delete tr1;
+    delete tr2;
+    QPolygonF pg;
+
+    //нужно определить координаты точек равнобедренного треугольника, учитывая угол
+    triangle tr;
+    tAngle = c1.Angle*_180_DIV_PI;
+    tr.x1 = c1.X-20*sin(tAngle);
+    tr.y1 = c1.Y-20*cos(tAngle);
+    tr.x2 = c1.X+70*cos(tAngle);
+    tr.y2 = c1.Y-70*sin(tAngle);
+    tr.x3 = c1.X+20*sin(tAngle);
+    tr.y3 = c1.Y+20*cos(tAngle);
+
+    pg<< QPointF(tr.x1/_MULTIPLIER+_BORDER,tr.y1/_MULTIPLIER+_BORDER)
+      <<QPointF(tr.x2/_MULTIPLIER+_BORDER,tr.y2/_MULTIPLIER+_BORDER)
+      <<QPointF(tr.x3/_MULTIPLIER+_BORDER,tr.y3/_MULTIPLIER+_BORDER);
+    tr1 = ArScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
+    pg.remove(0,3);
+
+    tAngle = c2.Angle*_180_DIV_PI;
+    tr.x1 = c2.X-20*sin(tAngle);
+    tr.y1 = c2.Y-20*cos(tAngle);
+    tr.x2 = c2.X+70*cos(tAngle);
+    tr.y2 = c2.Y-70*sin(tAngle);
+    tr.x3 = c2.X+20*sin(tAngle);
+    tr.y3 = c2.Y+20*cos(tAngle);
+
+    pg<< QPointF(tr.x1/_MULTIPLIER+_BORDER,tr.y1/_MULTIPLIER+_BORDER)
+      <<QPointF(tr.x2/_MULTIPLIER+_BORDER,tr.y2/_MULTIPLIER+_BORDER)
+      <<QPointF(tr.x3/_MULTIPLIER+_BORDER,tr.y3/_MULTIPLIER+_BORDER);
+    tr2 = ArScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
+
+}
+
+void Arena::Simulate()
+{
+    double tAngle;
+    int mX;
+    int mY;
+    int movement;
+
+    do
+    {
+        Fighter* m1 = GetMemberOne();
+        Fighter* m2 = GetMemberTwo();
+        Coord c1 = m1->GetCoord();
+        Coord c2 = m2->GetCoord();
+
+        int* IXArray1 = new int [32];
+        IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
+        IXArray1[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
+        IXArray1[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
+        IXArray1[_IX_ARENA_MAX_MOVE] = GetMaxMove();
+        IXArray1[_IX_MY_COORD_X] = c1.X;
+        IXArray1[_IX_MY_COORD_Y] = c1.Y;
+        IXArray1[_IX_ENEMY_COORD_X] = c2.X;
+        IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
+        IXArray1[_IX_ARENA_TICK_COUNT] = GetBattleTime();
+        for (int i = 9;i<32;i++)
+          IXArray1[i] = 0;
+        m1->SetConstTable(IXArray1);
+
+        int* IXArray2 = new int [32];
+        IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
+        IXArray2[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
+        IXArray2[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
+        IXArray2[_IX_ARENA_MAX_MOVE] = GetMaxMove();
+        IXArray2[_IX_MY_COORD_X] = c2.X;
+        IXArray2[_IX_MY_COORD_Y] = c2.Y;
+        IXArray2[_IX_ENEMY_COORD_X] = c1.X;
+        IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
+        IXArray2[_IX_ARENA_TICK_COUNT] = GetBattleTime();
+        for (int i = 9;i<32;i++)
+          IXArray2[i] = 0;
+
+        m2->SetConstTable(IXArray2);
+
+        delete(IXArray1);
+        delete(IXArray2);
+
+        double score1 =0;
+
+        Action act1 = m1->GetAction(this);
+      //  Action act2 = m2->GetAction(ar);
+
+        if (act1.ActionCode==_ACTION_TURN)
+        {
+            if (abs(act1.ActionRate)<=GetMaxAngle())
+                movement = act1.ActionRate;
+            else
+                movement = (GetMaxAngle()*sign(act1.ActionRate));
+            c1.Angle+=movement;
+            if (c1.Angle<0)
+                c1.Angle+=360;
+            if (c1.Angle>=360)
+                c1.Angle-=360;
+            m1->SetCoord(c1);
+            score1+=0.0002;
+        }
+        else if (act1.ActionCode==_ACTION_MOVE)
+        {
+            if (abs(act1.ActionRate)<=GetMaxMove())
+                movement = act1.ActionRate;
+            else
+                movement = GetMaxMove()*sign(act1.ActionRate);
+            tAngle = c1.Angle*_180_DIV_PI;
+            mX = floor(cos(tAngle)*movement);
+            mY = floor(sin(tAngle)*movement);
+            c1.X+=mX;
+            c1.Y-=mY;
+            if (c1.X<1)
+                c1.X=1;
+            if (c1.Y<1)
+                c1.Y=1;
+            if (c1.X>(GetArenaSizeX()-1))
+                c1.X=GetArenaSizeX()-1;
+            if (c1.Y>(GetArenaSizeY()-1))
+                c1.Y=GetArenaSizeY()-1;
+            m1->SetCoord(c1);
+            score1+=0.0002;
+        }
+        else if (act1.ActionCode==_ACTION_HALT)
+        {//do nothing
+        }
+
+        SetScoreOne(GetScoreOne()+score1);
+        ////ОЧКИ ЗА АКТИВНОСТЬ НА АРЕНЕ
+
+
+    /*      if (act2.ActionCode==_ACTION_TURN)
+        {
+            if (abs(act2.ActionRate)<=GetMaxAngle())
+                movement = act2.ActionRate;
+            else
+                movement = (GetMaxAngle()*sign(act2.ActionRate));
+            c2.Angle+=movement;
+            if (c2.Angle<0)
+                c2.Angle+=360;
+            if (c2.Angle>=360)
+                c2.Angle-=360;
+            m2->SetCoord(c2);
+            score2+=0.0002;
+        }
+        else if (act2.ActionCode==_ACTION_MOVE)
+        {
+            if (abs(act2.ActionRate)<=GetMaxMove())
+                movement = act2.ActionRate;
+            else
+                movement = GetMaxMove()*sign(act2.ActionRate);
+
+            tAngle= c2.Angle*_180_DIV_PI;
+            mX = trunc(cos(tAngle)*movement);
+            mY = trunc(sin(tAngle)*movement);
+            c2.X+=mX;
+            c2.Y-=mY;
+            if (c2.X<1)
+                c2.X=1;
+            if (c2.Y<1)
+                c2.Y=1;
+            if (c2.X>(GetArenaSizeX()-1))
+                c2.X=GetArenaSizeX()-1;
+            if (c2.Y>(GetArenaSizeY()-1))
+                c2.Y=GetArenaSizeY()-1;
+            m2->SetCoord(c2);
+        }
+        else if (act2.ActionCode==_ACTION_HALT)
+        {//do nothing
+        }
+    */
+        SetMemberOne(m1);
+        SetMemberTwo(m2);
 
         //посчитаем очки
         double distance = hypot((c1.X-c2.X),(c1.Y-c2.Y));
         score1 = 1/distance;
         double score2 = score1; //пока так
-        ar.SetScoreOne(ar.GetScoreOne()+score1);
-        ar.SetScoreTwo(ar.GetScoreTwo()+score2);
-        Score1Label->setText(QString::number(ar.GetScoreOne(),'f',5));
-     //   Score2Label->setText(QString::number(ar.GetScoreTwo(),'f',5));
-        ar.IncTickCount();
-        TickLabel->setText("Tick: "+QString::number(ar.GetBattleTime()));
-        if (ar.GetBattleTime()==1000)
-        {
-            this->killTimer(TimerID);
-            p->members[counter-1]->SetFitness(trunc(ar.GetScoreOne()*10000));
-            cout<<"Fitness = "<<p->members[counter-1]->GetFitness()<<endl;
-            cout<<"DNA usage(%) = "<<(int)((m1->GetDNAUsage()*100)/_DNASIZE)<<endl;
-            ar.Initialization(this);
-        }
+        SetScoreOne(GetScoreOne()+score1);
+        SetScoreTwo(GetScoreTwo()+score2);
+        IncTickCount();
     }
+    while (GetBattleTime()<_BATTLE_TIME);
 
-MyTimer::MyTimer(QGraphicsScene* PScene, QObject *pobj)
-    :ActScene(PScene), QObject(pobj)
-{
-    QPolygonF pg;
-//    pg << QPointF(30,30)<<QPointF(50,40)<<QPointF(30,50);
-    tr1 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
-    tr2 = ActScene->addPolygon(pg, QPen(Qt::black),QBrush(Qt::white));
+    p->members[counter-1]->SetFitness(trunc(GetScoreOne()*10000));
+//    cout<<counter-1<<endl;
+//    cout<<"Fitness = "<<p->members[counter-1]->GetFitness()<<endl;
+//    cout<<"DNA usage(%) = "<<(int)((m1->GetDNAUsage()*100)/_DNASIZE)<<endl;
+
 }
 
 void Arena::Initialization(MyTimer* Timer)
@@ -256,8 +430,8 @@ void Arena::Initialization(MyTimer* Timer)
     CoordsM2.Y = GetArenaSizeY()/2+700;
     CoordsM2.Angle = 180;
 
-    Fighter* m1 = ar.GetMemberOne();
-    Fighter* m2 = ar.GetMemberTwo();
+    Fighter* m1 = ar->GetMemberOne();
+    Fighter* m2 = ar->GetMemberTwo();
 
     m1->SetCoord(CoordsM1);
     m1->ResetVPU();
@@ -265,8 +439,6 @@ void Arena::Initialization(MyTimer* Timer)
     ptrbyte pDNA = p->members[counter]->GetDNA();
 
     m1->SetDNA(pDNA);
-
-    cout<<counter<<endl;
 
     int* IXArray1 = new int [32];
     IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
@@ -312,7 +484,8 @@ void Arena::Initialization(MyTimer* Timer)
     delete(IXArray2);
     counter++;
 
-    TimerID = Timer->startTimer(_ACTION_INTERVAL);
+    if (_FAST_CALC!=1)
+        TimerID = Timer->startTimer(_ACTION_INTERVAL);
 
 }
 
@@ -321,7 +494,6 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     QGraphicsScene* scene= new QGraphicsScene(QRectF(0,0,_WINDOW_SIZE_X,_WINDOW_SIZE_Y));
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-
     QGraphicsView view(scene);
 
     view.setWindowTitle("Battle manager");
@@ -342,7 +514,7 @@ int main(int argc, char **argv)
     TickLabel = new QLabel("0000000000");
     TickLabel->setAlignment(Qt::AlignHCenter);
     TickLabel->move(_WINDOW_SIZE_X/2-45,3);
-    TickLabel->setStyleSheet("background-color: yellow");    
+    TickLabel->setStyleSheet("background-color: yellow");
     scene->addWidget(TickLabel);
 
     Score1Label = new QLabel("000000000000");
@@ -356,32 +528,56 @@ int main(int argc, char **argv)
     Score2Label->move(_WINDOW_SIZE_X-120,3);
     Score2Label->setStyleSheet("background-color: yellow");
     scene->addWidget(Score2Label);
-
     view.show();
 
+    ar->SetScene(scene);
+
+    ar->Prepare();
  //   srand(time(0));
     ///THIS BLOCK IS FOR TEST PURPOSES ONLY!!!!
 //    pDB->AddPlayer(1, "Test");
 //
 //    pDB->CreateTable(1);
-   //   p->Generate();
-    p->Load();
+  //   p->Generate();
+//    p->Load();
+ //   cout<<"MAX fitness before = "<<p->members[0]->GetFitness()<<endl;
     //  p->Load();
 
 //    p->Save();
-    Population* pNew = p->Evolve(1,0);
-    pNew->CopyTo(p);
-    delete pNew;
- //   p->Load();
+//    Population* pNew = p->Evolve(1,0);
+ //   pNew->CopyTo(p);
+  //  delete pNew;
+    p->Load();
     /////END OF BLOCK
 
+    MyTimer* Timer1 = new MyTimer;
     counter = 0;
-    ar.SetMemberOne(m1);
-    ar.SetMemberTwo(m2);
 
-    MyTimer* Timer1 = new MyTimer(scene);
+    ar->SetMemberOne(m1);
+    ar->SetMemberTwo(m2);
 
-    ar.Initialization(Timer1);
+    if (_FAST_CALC==1)
+    {
+        for (int j = 1;j<=50;j++)//количество популяций
+        {
+            counter = 0;
+            Population* pNew = p->Evolve(1,0);
+            pNew->CopyTo(p);
+            delete pNew;
+
+            for (unsigned int i=0;i<_POPULATION_SIZE;i++)
+            {
+
+                ar->Initialization(Timer1);
+                ar->Simulate();
+            }
+            p->Sort();
+            cout<<"Leader fitness after "<<j<<" = "<<p->members[0]->GetFitness()<<endl;
+        }
+        p->Save();
+    }
+    else
+        ar->Initialization(Timer1);
 
     return app.exec();
 }

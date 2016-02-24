@@ -65,7 +65,7 @@ bool VPU::PFlag()
 
 word VPU::GetIXValue(byte index)
     {
-        byte temp=index|31;
+        byte temp=index&31;
         return IXArray[temp];
     }
 
@@ -76,51 +76,11 @@ void VPU::IncPC(int step)
         if (pc>_DNASIZE)
             pc=0;
     }
-char VPU::DecToHex(byte a)
-    {
-    switch(a)
-    {
-    case 0:
-        return '0';
-    case 1:
-        return '1';
-    case 2:
-        return '2';
-    case 3:
-        return '3';
-    case 4:
-        return '4';
-    case 5:
-        return '5';
-    case 6:
-        return '6';
-    case 7:
-        return '7';
-    case 8:
-        return '8';
-    case 9:
-        return '9';
-    case 10:
-        return 'A';
-    case 11:
-        return 'B';
-    case 12:
-        return 'C';
-    case 13:
-        return 'D';
-    case 14:
-        return 'E';
-    case 15:
-        return 'F';
-    }
-    return '0';
-    }
 
 void VPU::Reset()
     {
         ar = 0;
         bc = 0;
-        ix = 0;
         pc = 0;
         f = 0;
         SetFlags();
@@ -129,24 +89,6 @@ void VPU::Reset()
            randarray[i] = rand()%256;
         randpointer = 0;
         DNAUsage = 0;
-    }
-int VPU::GetPC()
-    {return pc;}
-void VPU::SetPC(word arg)
-    {pc = arg;}
-void VPU::SetIX(word arg)
-    {ix = arg;}
-string VPU::GetHex(byte p)
-    {
-        int a = p/16;
-        int b = p%16;
-        char ca = DecToHex(a);
-        char cb = DecToHex(b);
-        stringstream ss;
-        ss<<ca<<cb;
-        string s;
-        ss>>s;
-        return s;
     }
 
 int VPU::Execute(byte b1, byte b2, byte b3)
@@ -709,7 +651,7 @@ Fighter::Fighter()
     vpu.Reset();
 	}
 
-Action Fighter::GetAction(Arena a)
+Action Fighter::GetAction(Arena *a)
 {
     //основная процедура исполняемого кода бойца
     //процессор должен быть настроен, выполнение продолжается с момента последнего прерывания
@@ -742,7 +684,7 @@ Action Fighter::GetAction(Arena a)
         {
         case 1:
             Act.ActionCode = _ACTION_MOVE;
-            Act.ActionRate = abs((vpu.GetAR()&63));
+            Act.ActionRate = abs(vpu.GetAR()&63);
             stop = true;
             break;
         case 2:

@@ -7,14 +7,8 @@
 
 class MyTimer : public QObject {
 protected:
-    QGraphicsScene* ActScene;
-    QGraphicsPolygonItem* tr1;
-    QGraphicsPolygonItem* tr2;
-
     virtual void timerEvent(QTimerEvent *);
 
-public:
-    MyTimer(QGraphicsScene* PScene, QObject* pobj = 0);
 };
 
 
@@ -40,12 +34,16 @@ private:
     float Score2;
     Fighter* Member1;
     Fighter* Member2;
+    QGraphicsScene* ArScene;
+    QGraphicsPolygonItem* tr1;
+    QGraphicsPolygonItem* tr2;
 public:
-    Arena(int pX, int pY, int MAngle, int MMove):
-        sizeX(pX), sizeY(pY), MaxAngle(MAngle), MaxMove(MMove), TickCount(0)
+    Arena()
     {}
     ~Arena()
     {}
+    void SetScene(QGraphicsScene* pScene)
+    {ArScene = pScene;}
     void Initialization(MyTimer *Timer);
     int GetArenaSizeX()
     {return sizeX;}
@@ -83,5 +81,8 @@ public:
     {return Score1;}
     float GetScoreTwo()
     {return Score2;}
+    void ReDraw();
+    void Prepare();
+    void Simulate();
 };
 #endif // ARENA_H
