@@ -25,7 +25,10 @@ static Fighter* m2 = new Fighter;
 
 int sign(int n)
 {    
- return (n<=32767)-(n>=32767);
+    if (n>=0)
+        return 1;
+    else
+        return -1;
 }
 
 Arena ar((_WINDOW_SIZE_X-_BORDER*2)*_MULTIPLIER,(_WINDOW_SIZE_Y-_BORDER*2)*_MULTIPLIER,5,20);
@@ -46,21 +49,34 @@ void MyTimer::timerEvent(QTimerEvent *)
         Coord c1 = m1->GetCoord();
         Coord c2 = m2->GetCoord();
 
-        ptrword IXArray1 = new word[32];
+        int* IXArray1 = new int [32];
+        IXArray1[_IX_ARENA_SIZE_X] = ar.GetArenaSizeX();
+        IXArray1[_IX_ARENA_SIZE_Y] = ar.GetArenaSizeY();
+        IXArray1[_IX_ARENA_MAX_ANGLE] = ar.GetMaxAngle();
+        IXArray1[_IX_ARENA_MAX_MOVE] = ar.GetMaxMove();
         IXArray1[_IX_MY_COORD_X] = c1.X;
         IXArray1[_IX_MY_COORD_Y] = c1.Y;
         IXArray1[_IX_ENEMY_COORD_X] = c2.X;
         IXArray1[_IX_ENEMY_COORD_Y] = c2.Y;
         IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
+        for (int i = 9;i<32;i++)
+          IXArray1[i] = 0;
         m1->SetConstTable(IXArray1);
 
-        ptrword IXArray2 = new word[32];
+        int* IXArray2 = new int [32];
+        IXArray2[_IX_ARENA_SIZE_X] = ar.GetArenaSizeX();
+        IXArray2[_IX_ARENA_SIZE_Y] = ar.GetArenaSizeY();
+        IXArray2[_IX_ARENA_MAX_ANGLE] = ar.GetMaxAngle();
+        IXArray2[_IX_ARENA_MAX_MOVE] = ar.GetMaxMove();
         IXArray2[_IX_MY_COORD_X] = c2.X;
         IXArray2[_IX_MY_COORD_Y] = c2.Y;
         IXArray2[_IX_ENEMY_COORD_X] = c1.X;
         IXArray2[_IX_ENEMY_COORD_Y] = c1.Y;
-        IXArray1[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
-        m1->SetConstTable(IXArray1);
+        IXArray2[_IX_ARENA_TICK_COUNT] = ar.GetBattleTime();
+        for (int i = 9;i<32;i++)
+          IXArray2[i] = 0;
+
+        m2->SetConstTable(IXArray2);
 
         delete(IXArray1);
         delete(IXArray2);
@@ -71,11 +87,12 @@ void MyTimer::timerEvent(QTimerEvent *)
       //  Action act2 = m2->GetAction(ar);
 
         if (act1.ActionCode==_ACTION_TURN)
-        {
+        {            
             if (abs(act1.ActionRate)<=ar.GetMaxAngle())
-                c1.Angle+=act1.ActionRate;
+                movement = act1.ActionRate;
             else
-                c1.Angle+=(ar.GetMaxAngle()*sign(act1.ActionRate));
+                movement = (ar.GetMaxAngle()*sign(act1.ActionRate));
+            c1.Angle+=movement;
             if (c1.Angle<0)
                 c1.Angle+=360;
             if (c1.Angle>=360)
@@ -116,15 +133,16 @@ void MyTimer::timerEvent(QTimerEvent *)
   /*      if (act2.ActionCode==_ACTION_TURN)
         {
             if (abs(act2.ActionRate)<=ar.GetMaxAngle())
-                c2.Angle+=act2.ActionRate;
+                movement = act2.ActionRate;
             else
-                c2.Angle+=(ar.GetMaxAngle()*sign(act2.ActionRate));
+                movement = (ar.GetMaxAngle()*sign(act2.ActionRate));
+            c2.Angle+=movement;
             if (c2.Angle<0)
                 c2.Angle+=360;
             if (c2.Angle>=360)
                 c2.Angle-=360;
- //           cout<<act2.ActionRate<<endl;
             m2->SetCoord(c2);
+            score2+=0.0002;
         }
         else if (act2.ActionCode==_ACTION_MOVE)
         {
@@ -235,7 +253,7 @@ void Arena::Initialization(MyTimer* Timer)
     //ТЕСТЫ С НЕПОДВИЖНОЙ МИШЕНЬЮ
     Coord CoordsM2;
     CoordsM2.X = GetArenaSizeX()/2;
-    CoordsM2.Y = GetArenaSizeY()/2-700;
+    CoordsM2.Y = GetArenaSizeY()/2+700;
     CoordsM2.Angle = 180;
 
     Fighter* m1 = ar.GetMemberOne();
@@ -250,7 +268,7 @@ void Arena::Initialization(MyTimer* Timer)
 
     cout<<counter<<endl;
 
-    ptrword IXArray1 = new word [32];
+    int* IXArray1 = new int [32];
     IXArray1[_IX_ARENA_SIZE_X] = GetArenaSizeX();
     IXArray1[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
     IXArray1[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
@@ -270,7 +288,7 @@ void Arena::Initialization(MyTimer* Timer)
 
     m2->SetDNA(pDNA);
 
-    ptrword IXArray2 = new word [32];
+    int* IXArray2 = new int [32];
     IXArray2[_IX_ARENA_SIZE_X] = GetArenaSizeX();
     IXArray2[_IX_ARENA_SIZE_Y] = GetArenaSizeY();
     IXArray2[_IX_ARENA_MAX_ANGLE] = GetMaxAngle();
@@ -346,30 +364,24 @@ int main(int argc, char **argv)
 //    pDB->AddPlayer(1, "Test");
 //
 //    pDB->CreateTable(1);
-//      p->Generate();
+   //   p->Generate();
     p->Load();
-    p->Sort();
-    for (unsigned int i = 0; i<_POPULATION_SIZE; i++)
-        cout<<p->members[i]->GetFitness()<<endl;
-//    p->Save();
     //  p->Load();
 
 //    p->Save();
-//    Population* pNew = p->Evolve(1,0);
-//    pNew->Save();
-//    pNew->CopyTo(p);
- //   delete pNew;
-//    p->Load();
+    Population* pNew = p->Evolve(1,0);
+    pNew->CopyTo(p);
+    delete pNew;
+ //   p->Load();
     /////END OF BLOCK
 
     counter = 0;
-
     ar.SetMemberOne(m1);
     ar.SetMemberTwo(m2);
 
     MyTimer* Timer1 = new MyTimer(scene);
 
-//    ar.Initialization(Timer1);
+    ar.Initialization(Timer1);
 
     return app.exec();
 }

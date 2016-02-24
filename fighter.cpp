@@ -742,12 +742,15 @@ Action Fighter::GetAction(Arena a)
         {
         case 1:
             Act.ActionCode = _ACTION_MOVE;
-            Act.ActionRate = (vpu.GetAR()&63);
+            Act.ActionRate = abs((vpu.GetAR()&63));
             stop = true;
             break;
         case 2:
             Act.ActionCode = _ACTION_TURN;
-            Act.ActionRate = (vpu.GetAR()&33279);
+            if (vpu.GetAR()<0)
+               Act.ActionRate = (vpu.GetAR()&255)*(-1);
+            else
+               Act.ActionRate = (vpu.GetAR()&255);
             stop = true;
             break;
         case 3:
@@ -784,7 +787,7 @@ Action Fighter::GetAction(Arena a)
             break;
         case 7:
             Act.ActionCode = _ACTION_MOVE;
-            Act.ActionRate = (vpu.GetAR()&63)*(-1);
+            Act.ActionRate = abs(vpu.GetAR()&63)*(-1);
             stop = true;
             break;
 

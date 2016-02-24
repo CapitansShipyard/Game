@@ -28,7 +28,7 @@ private:
     word GetIXValue(byte index);
     void IncPC(int step);
     char DecToHex(byte a);
-    word IXArray[32];
+    int IXArray[32];
 public:    
     void Reset();
     int GetPC();
@@ -38,10 +38,10 @@ public:
     int Execute(byte b1, byte b2, byte b3);    
     word GetAR()
     {return ar;}
-    word GetIXArrayValue(byte index)
+    int GetIXArrayValue(byte index)
     {return IXArray[index];}
-    void SetIXArray(word* IXArr)
-    {memcpy(IXArray, IXArr,32);}
+    void SetIXArray(int* IXArr)
+    {memcpy(IXArray, IXArr,sizeof(int)*32);}
     int AngleToWall();
     int AngleToEnemy();
     void SetRandpointer(word pPtr)
@@ -68,17 +68,17 @@ class Fighter
 {
 private:
     Action Act;
-    Coord MyCoord;
-    VPU vpu;
+    Coord MyCoord;    
     byte dna[_DNASIZE];
-public:
+    VPU vpu;
+public:    
     Fighter();
     Coord GetCoord()
     {return(MyCoord);}
     void SetCoord(Coord a)
     {MyCoord=a;}
     Action GetAction(Arena a);    
-    void SetConstTable(word* ptrCT)
+    void SetConstTable(int* ptrCT)
     {vpu.SetIXArray(ptrCT);}
     void SetDNA(ptrbyte pDNA)
     {memcpy(dna, pDNA, _DNASIZE);}
